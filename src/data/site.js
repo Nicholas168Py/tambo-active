@@ -9,8 +9,9 @@ export const SITIO = {
     'Camiseta deportiva premium de alto gramaje. Personaliza tu color y logo y recibe tu camiseta en la puerta de tu casa.',
   dominio: 'https://tamboactive.com',
   canonical: 'https://tamboactive.com/',
-  telefonoDisplay: '+57 300 123 4567',
-  telefonoWa: '573001234567',
+  telefonoDisplay: '+57 311 224 7905',
+  telefonoWa: '573112247905',
+  instagram: 'https://www.instagram.com/tamboactive/',
   email: 'info@tamboactive.com'
 };
 

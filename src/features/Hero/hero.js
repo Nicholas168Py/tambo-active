@@ -2,6 +2,7 @@ import gsap from 'gsap';
 import { Component } from '../../core/Component.js';
 import { prefiereMovimientoReducido } from '../../shared/utils/reduceMotion.js';
 import { whatsappButton } from '../../shared/components/WhatsAppButton.js';
+import { enlaceWhatsAppInformacion } from '../../shared/utils/whatsapp.js';
 import template from './hero.html?raw';
 import './hero.css';
 
@@ -23,7 +24,7 @@ export class Hero extends Component {
     if (cta) {
       cta.innerHTML = whatsappButton({
         text: 'COMPRAR POR WHATSAPP',
-        href: '#',
+        href: enlaceWhatsAppInformacion(),
         iconClass: 'w-6 h-6',
         classes: CTA_CLASES
       });

@@ -1,10 +1,10 @@
-import { createIcons, Menu, Layers, Wind, Shirt, Scissors, WashingMachine } from 'lucide';
+import { createIcons, Menu, Layers, Wind, Shirt, Scissors, WashingMachine, Spool } from 'lucide';
 
 /**
  * Mapa de iconos Lucide utilizados en las plantillas.
  * Las claves deben estar en PascalCase.
  */
-const ICONOS = { Menu, Layers, Wind, Shirt, Scissors, WashingMachine };
+const ICONOS = { Menu, Layers, Wind, Shirt, Scissors, WashingMachine, Spool };
 
 /**
  * Reemplaza los elementos `[data-lucide]` por sus SVGs.

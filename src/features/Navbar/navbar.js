@@ -1,5 +1,6 @@
 import { Component } from '../../core/Component.js';
 import { whatsappButton } from '../../shared/components/WhatsAppButton.js';
+import { enlaceWhatsAppInformacion } from '../../shared/utils/whatsapp.js';
 import template from './navbar.html?raw';
 import './navbar.css';
 
@@ -23,7 +24,7 @@ export class Navbar extends Component {
     if (ctaDesk) {
       ctaDesk.innerHTML = whatsappButton({
         text: 'Comprar por WhatsApp',
-        href: '#',
+        href: enlaceWhatsAppInformacion(),
         iconClass: 'w-5 h-5',
         classes: CTA_CLASES_DESKTOP
       });
@@ -32,7 +33,7 @@ export class Navbar extends Component {
     if (ctaMovil) {
       ctaMovil.innerHTML = whatsappButton({
         text: 'Comprar por WhatsApp',
-        href: '#',
+        href: enlaceWhatsAppInformacion(),
         iconClass: 'w-5 h-5',
         classes: CTA_CLASES_MOVIL
       });

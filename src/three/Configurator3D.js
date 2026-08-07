@@ -5,11 +5,19 @@ import { crearRenderer, redimensionar } from './Renderer.js';
 import { crearLuces } from './Lights.js';
 import { cargarModelo, centrarModelo, disponerModelo, aplicarAcabadoTela } from './ModelLoader.js';
 import { crearControles } from './Controls.js';
+import { DecalGeometry } from 'three/examples/jsm/geometries/DecalGeometry.js';
 import { Animator } from './Animator.js';
 import { COLORES } from '../data/colores.js';
+import { LOGOS } from '../data/logos.js';
 import rutaModelo from '../assets/models/camisa.glb';
 
 const FOTOGRAFIAS_TRAS_INTERACCION = 26;
+const LOGO_ALTURA_PECHO = 0.75;
+const LOGO_X_PECHO = 0.27;
+const LOGO_TAMANO_MAX = 0.16;
+const LOGO_ESPESOR = 0.15;
+const PECHO_EXPANSION = 0.22;
+const PECHO_PROFUNDIDAD = 0.2;
 
 /**
  * Configurator3D: orquesta el visor 3D del configurador.
@@ -37,6 +45,18 @@ export class Configurator3D {
     this._destruido = false;
     this._observador = null;
 
+    this._caja = null;
+    this._cargadorTexturas = new THREE.TextureLoader();
+    this._raycaster = new THREE.Raycaster();
+    this._texturas = new Map();
+    this._logoIdActual = null;
+    this._logoMalla = null;
+    this._logoMaterial = null;
+    this._decalGeometrias = new Map();
+    this._frenteReducido = null;
+    this._posicionLogo = null;
+    this._orientacionLogo = null;
+
     this._redimensionar();
     this._observador = new ResizeObserver(() => this._redimensionar());
     this._observador.observe(contenedor);
@@ -60,6 +80,7 @@ export class Configurator3D {
       if (this._seleccion) this._aplicarSeleccion(this._seleccion);
 
       const caja = centrarModelo(modelo);
+      this._caja = caja;
       const { distancia } = ajustarCamaraAlModelo(this._camara, caja);
       this._controles.minDistance = distancia * 0.82;
       this._controles.maxDistance = distancia * 1.28;
@@ -86,8 +107,8 @@ export class Configurator3D {
   }
 
   /**
-   * Aplica la selección del configurador sobre el modelo 3D.
-   * Por ahora solo colorea la camiseta; el logo se conectará más adelante.
+   * Aplica la selección del configurador sobre el modelo 3D:
+   * colorea la camiseta y coloca el logo en el pecho.
    * @param {{ color: string, logo: string }} seleccion
    */
   aplicarSeleccion(seleccion) {
@@ -96,18 +117,225 @@ export class Configurator3D {
   }
 
   /** Colorea los materiales del modelo con el hex del color elegido. */
-  _aplicarSeleccion({ color }) {
+  _aplicarSeleccion({ color, logo }) {
     if (!this._modelo) return;
 
     const hex = COLORES.find((c) => c.id === color)?.hex;
-    if (!hex) return;
+    if (hex) {
+      this._modelo.traverse((objeto) => {
+        if (!objeto.isMesh || objeto === this._logoMalla) return;
+        const materiales = Array.isArray(objeto.material) ? objeto.material : [objeto.material];
+        materiales.forEach((material) => material.color?.set(hex));
+      });
+    }
 
-    this._modelo.traverse((objeto) => {
-      if (!objeto.isMesh) return;
-      const materiales = Array.isArray(objeto.material) ? objeto.material : [objeto.material];
-      materiales.forEach((material) => material.color?.set(hex));
-    });
+    this._aplicarLogo(logo);
     this._solicitarRender();
+  }
+
+  /**
+   * Coloca en el pecho la textura del logo seleccionado.
+   * @param {string} logoId
+   */
+  _aplicarLogo(logoId) {
+    this._logoIdActual = logoId;
+    if (!this._modelo) return;
+
+    const logo = LOGOS.find((l) => l.id === logoId);
+    if (!logo || !logo.src) {
+      this._quitarLogo();
+      return;
+    }
+
+    this._cargarTextoLogo(logo.src).then((texto) => {
+      if (this._destruido || this._logoIdActual !== logoId || !this._modelo) return;
+      this._colocarLogo(texto, logo.tamanoMax);
+    });
+  }
+
+  /**
+   * Carga (y cachea) la textura del logo.
+   * @param {string} url
+   * @returns {Promise<THREE.Texture>}
+   */
+  _cargarTextoLogo(url) {
+    if (!this._texturas.has(url)) {
+      this._texturas.set(
+        url,
+        new Promise((resolver, rechazar) => {
+          this._cargadorTexturas.load(
+            url,
+            (texto) => {
+              texto.colorSpace = THREE.SRGBColorSpace;
+              texto.anisotropy = Math.min(8, this._renderizador.capabilities.getMaxAnisotropy());
+              resolver(texto);
+            },
+            undefined,
+            rechazar
+          );
+        })
+      );
+    }
+    return this._texturas.get(url);
+  }
+
+  /**
+   * Crea/actualiza el logo sobre el pecho. El logo se pega a la superficie
+   * con DecalGeometry sobre una fracción reducida de la malla (solo los
+   * triángulos cercanos al punto de impacto), evitando que quede flotando
+   * o recortado y siguiendo la curvatura del pecho.
+   * @param {THREE.Texture} texto
+   * @param {number} [tamanoMax] - Tamaño máximo propio del logo (por defecto LOGO_TAMANO_MAX).
+   */
+  _colocarLogo(texto, tamanoMax = LOGO_TAMANO_MAX) {
+    const anchoImg = texto.image?.width || 1;
+    const altoImg = texto.image?.height || 1;
+    const aspecto = anchoImg / altoImg;
+    const ancho = aspecto >= 1 ? tamanoMax : tamanoMax * aspecto;
+    const alto = aspecto >= 1 ? tamanoMax / aspecto : tamanoMax;
+
+    const decal = this._obtenerDecal(ancho, alto);
+    if (!decal) {
+      this._quitarLogo();
+      return;
+    }
+
+    if (!this._logoMalla) {
+      this._logoMaterial = new THREE.MeshBasicMaterial({
+        map: texto,
+        transparent: true,
+        depthWrite: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -4,
+        polygonOffsetUnits: -24
+      });
+      this._logoMalla = new THREE.Mesh(decal, this._logoMaterial);
+      this._logoMalla.renderOrder = 1;
+      this._modelo.add(this._logoMalla);
+    }
+
+    this._logoMalla.geometry = decal;
+    this._logoMaterial.map = texto;
+    this._logoMaterial.needsUpdate = true;
+    this._logoMalla.visible = true;
+    this._solicitarRender();
+  }
+
+  /**
+   * Obtiene (y cachea) la geometría del decal del logo para un tamaño dado.
+   * @param {number} ancho
+   * @param {number} alto
+   * @returns {THREE.BufferGeometry|null}
+   */
+  _obtenerDecal(ancho, alto) {
+    const clave = ancho.toFixed(4) + 'x' + alto.toFixed(4);
+    if (!this._decalGeometrias.has(clave)) {
+      const frente = this._obtenerFrenteReducido();
+      if (!frente) return null;
+      this._decalGeometrias.set(
+        clave,
+        new DecalGeometry(frente, this._posicionLogo, this._orientacionLogo, new THREE.Vector3(ancho, alto, LOGO_ESPESOR))
+      );
+    }
+    return this._decalGeometrias.get(clave);
+  }
+
+  /**
+   * Malla reducida con los triángulos del pecho (espacio local del modelo),
+   * suficiente para el DecalGeometry sin recorrer las ~500k caras completas.
+   * Se construye una única vez y se cachea.
+   * @returns {THREE.Mesh|null}
+   */
+  _obtenerFrenteReducido() {
+    if (this._frenteReducido) return this._frenteReducido;
+
+    const malla = this._modelo.getObjectByProperty('isMesh', true);
+    if (!malla) return null;
+
+    const geo = malla.geometry;
+    const pos = geo.attributes.position;
+    const normal = geo.attributes.normal;
+    const indice = geo.index;
+    if (!pos || !indice) return null;
+
+    const cajaMundo = new THREE.Box3().setFromObject(this._modelo);
+    const yCentro = cajaMundo.min.y + (cajaMundo.max.y - cajaMundo.min.y) * LOGO_ALTURA_PECHO;
+
+    this._raycaster.set(new THREE.Vector3(LOGO_X_PECHO, yCentro, 20), new THREE.Vector3(0, 0, -1));
+    const golpes = this._raycaster.intersectObject(this._modelo, true);
+    if (!golpes.length) return null;
+    const golpe = golpes[0];
+
+    this._posicionLogo = new THREE.Vector3(
+      LOGO_X_PECHO - this._modelo.position.x,
+      yCentro - this._modelo.position.y,
+      golpe.point.z - this._modelo.position.z
+    );
+    this._orientacionLogo = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 0, 1),
+      golpe.face.normal.clone().normalize()
+    );
+
+    const aabbMin = new THREE.Vector3(
+      LOGO_X_PECHO - PECHO_EXPANSION,
+      yCentro - PECHO_EXPANSION,
+      golpe.point.z - PECHO_PROFUNDIDAD
+    ).sub(this._modelo.position);
+    const aabbMax = new THREE.Vector3(
+      LOGO_X_PECHO + PECHO_EXPANSION,
+      yCentro + PECHO_EXPANSION,
+      golpe.point.z + PECHO_PROFUNDIDAD
+    ).sub(this._modelo.position);
+
+    const verts = [];
+    const normales = [];
+    const a = new THREE.Vector3();
+    const b = new THREE.Vector3();
+    const c = new THREE.Vector3();
+    const nTri = indice.count / 3;
+
+    for (let t = 0; t < nTri; t++) {
+      const i0 = indice.getX(t * 3);
+      const i1 = indice.getX(t * 3 + 1);
+      const i2 = indice.getX(t * 3 + 2);
+      a.fromBufferAttribute(pos, i0);
+      b.fromBufferAttribute(pos, i1);
+      c.fromBufferAttribute(pos, i2);
+
+      const minX = Math.min(a.x, b.x, c.x);
+      const maxX = Math.max(a.x, b.x, c.x);
+      const minY = Math.min(a.y, b.y, c.y);
+      const maxY = Math.max(a.y, b.y, c.y);
+      const minZ = Math.min(a.z, b.z, c.z);
+      const maxZ = Math.max(a.z, b.z, c.z);
+      if (maxX < aabbMin.x || minX > aabbMax.x || maxY < aabbMin.y || minY > aabbMax.y || maxZ < aabbMin.z || minZ > aabbMax.z) {
+        continue;
+      }
+
+      verts.push(pos.getX(i0), pos.getY(i0), pos.getZ(i0));
+      verts.push(pos.getX(i1), pos.getY(i1), pos.getZ(i1));
+      verts.push(pos.getX(i2), pos.getY(i2), pos.getZ(i2));
+      if (normal) {
+        normales.push(normal.getX(i0), normal.getY(i0), normal.getZ(i0));
+        normales.push(normal.getX(i1), normal.getY(i1), normal.getZ(i1));
+        normales.push(normal.getX(i2), normal.getY(i2), normal.getZ(i2));
+      }
+    }
+
+    if (!verts.length) return null;
+
+    const reducida = new THREE.BufferGeometry();
+    reducida.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+    if (normales.length) reducida.setAttribute('normal', new THREE.Float32BufferAttribute(normales, 3));
+
+    this._frenteReducido = new THREE.Mesh(reducida);
+    this._frenteReducido.updateMatrixWorld(true);
+    return this._frenteReducido;
+  }
+
+  /** Oculta el logo del pecho. */
+  _quitarLogo() {
+    if (this._logoMalla) this._logoMalla.visible = false;
   }
 
   _vincularInteraccion() {
@@ -219,6 +447,14 @@ export class Configurator3D {
     this._animador?.dispose();
     this._controles.dispose();
     if (this._modelo) disponerModelo(this._modelo);
+    this._texturas.forEach((texto) => texto.then?.((t) => t.dispose()));
+    this._logoMaterial?.dispose();
+    if (this._logoMalla) {
+      this._modelo?.remove(this._logoMalla);
+      this._logoMalla.geometry.dispose();
+    }
+    this._decalGeometrias.forEach((g) => g.dispose());
+    if (this._frenteReducido) this._frenteReducido.geometry.dispose();
     this._renderizador.dispose();
     this._renderizador.domElement.remove();
     if (window.__tambo3D === this) window.__tambo3D = null;

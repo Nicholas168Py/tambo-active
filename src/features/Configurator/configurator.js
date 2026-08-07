@@ -15,16 +15,14 @@ import './configurator.css';
 const CTA_CLASES =
   'inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-brand-green text-brand-black font-bold text-sm transition-all duration-300 shadow-lg shadow-brand-green/20 hover:bg-opacity-90 hover:-translate-y-0.5';
 
+const COLORES_CLAROS = new Set(['blanco', 'gris-claro']);
+
 function contenidoLogo(logo) {
-  if (logo.tipo === 'texto') {
-    return (
-      '<div class="flex items-center gap-3">' +
-      '<div class="config-logo-ta">TA</div>' +
-      '<span class="config-logo-txt">TAMBO ACTIVE</span>' +
-      '</div>'
-    );
+  if (logo.tipo !== 'imagen' || !logo.src) {
+    return `<span class="config-logo-txt">${logo.label}</span>`;
   }
-  return `<img src="${logo.src}" alt="${logo.label}" class="config-logo-img" loading="lazy" decoding="async" />`;
+  const extra = logo.tamanoMax ? ' config-logo-img--grande' : '';
+  return `<img src="${logo.src}" alt="${logo.label}" class="config-logo-img${extra}" loading="lazy" decoding="async" />`;
 }
 
 function renderColores(contenedor, colorInicial) {
@@ -49,10 +47,14 @@ function renderLogos(contenedor, logoInicial) {
       `<input type="radio" name="config-logo" value="${logo.id}" class="sr-only"` +
       (logo.id === logoInicial ? ' checked' : '') +
       '>' +
-      `<div class="config-logo-card bg-white">${contenidoLogo(logo)}</div>` +
+      `<div class="config-logo-card${logo.tipo === 'imagen' ? ' config-logo-card--img' : ' bg-white'}">${contenidoLogo(logo)}</div>` +
       `<span class="config-check absolute top-3 right-3">${CHECK_SVG}</span>` +
       '</label>'
   ).join('');
+}
+
+function aplicarModoSeccion(seccion, colorId) {
+  seccion.classList.toggle('config-section--oscuro', COLORES_CLAROS.has(colorId));
 }
 
 function seleccionActual(contexto = document) {
@@ -110,11 +112,13 @@ export class Configurator extends Component {
     const caption = this.query('[data-config-caption]');
     const btn = this.query('#config-combo-btn');
     const contenedor3D = this.query('[data-config-3d]');
+    const seccion = this.query('#colores');
 
-    if (!colores || !logos || !caption || !btn || !contenedor3D) return;
+    if (!colores || !logos || !caption || !btn || !contenedor3D || !seccion) return;
 
     renderColores(colores, this.colorInicial);
     renderLogos(logos, this.logoInicial);
+    aplicarModoSeccion(seccion, this.colorInicial);
 
     ['config-color', 'config-logo'].forEach((grupo) => {
       $$(`input[name="${grupo}"]`, this.root).forEach((input) => {
@@ -123,6 +127,7 @@ export class Configurator extends Component {
           caption.textContent = etiquetaCombinacion(sel.color, sel.logo, COLORES, LOGOS);
           btn.href = enlaceWhatsApp(sel.color, sel.logo, COLORES, LOGOS);
           store.set('seleccion', sel);
+          if (grupo === 'config-color') aplicarModoSeccion(seccion, sel.color);
           this._tres?.aplicarSeleccion(sel);
         });
       });
