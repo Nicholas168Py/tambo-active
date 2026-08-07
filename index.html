@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tambo Active | Camisetas deportivas premium personalizables</title>
+  <meta name="description"
+    content="Camiseta deportiva premium de alto gramaje. Elige tu color y logo, personaliza tu camiseta y recíbela en la puerta de tu casa." />
+  <meta name="theme-color" content="#0c0c0c" />
+  <link rel="canonical" href="https://tamboactive.com/" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Tambo Active" />
+  <meta property="og:title" content="Tambo Active | Camisetas deportivas premium personalizables" />
+  <meta property="og:description"
+    content="Camiseta deportiva premium de alto gramaje. Elige tu color y logo, personaliza tu camiseta y recíbela en la puerta de tu casa." />
+  <meta property="og:url" content="https://tamboactive.com/" />
+  <meta property="og:image" content="https://tamboactive.com/hero/camisa-hero.png" />
+  <meta property="og:locale" content="es_CO" />
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Tambo Active | Camisetas deportivas premium personalizables" />
+  <meta name="twitter:description"
+    content="Camiseta deportiva premium de alto gramaje. Elige tu color y logo y recibe tu camiseta en casa." />
+  <meta name="twitter:image" content="https://tamboactive.com/hero/camisa-hero.png" />
+
+  <!-- Schema.org: Producto -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "Camiseta Deportiva Premium Tambo Active",
+      "description": "Camiseta deportiva premium de alto gramaje, transpirable, con costuras reforzadas y logo bordado. Personalizable en color y logo.",
+      "brand": { "@type": "Brand", "name": "Tambo Active" },
+      "image": "https://tamboactive.com/hero/camisa-hero.png",
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "COP",
+        "lowPrice": "49000",
+        "highPrice": "59000",
+        "availability": "https://schema.org/InStock"
+      }
+    }
+  </script>
+
+  <!-- Schema.org: Organizacion -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Tambo Active",
+      "url": "https://tamboactive.com/",
+      "logo": "https://tamboactive.com/favicon.svg",
+      "contactPoint": [
+        { "@type": "ContactPoint", "telephone": "+57-300-123-4567", "contactType": "customer service" },
+        { "@type": "ContactPoint", "email": "info@tamboactive.com" }
+      ]
+    }
+  </script>
+
+  <!-- Marca JS activo antes del primer paint (habilita los estados de reveal) -->
+  <script>document.documentElement.classList.add('js');</script>
+
+  <!-- Fuentes: preconnect + carga no bloqueante -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+
+  <!-- Preload exclusivo del hero (solo la camiseta protagonista) -->
+  <link rel="preload" as="image" href="/hero/camisa-hero.png" fetchpriority="high" />
+
+  <script type="module" src="/src/main.js"></script>
+</head>
+
+<body class="bg-white text-gray-800 antialiased selection:bg-brand-green selection:text-white">
+  <!-- Contenedor principal: los componentes se montan aquí. -->
+  <div id="app"></div>
+</body>
+
+</html>

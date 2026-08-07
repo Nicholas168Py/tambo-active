@@ -1,0 +1,15 @@
+/* ============================================
+   TESTIMONIOS
+   Controles del carrusel y estados.
+   ============================================ */
+
+#testimonial-dots div {
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+/* Botones prev/next con anillo de foco accesible */
+#testimonial-prev,
+#testimonial-next {
+  transition: color 0.25s ease, background-color 0.25s ease;
+}

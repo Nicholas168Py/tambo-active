@@ -1,0 +1,42 @@
+/* ============================================
+   BENEFICIOS (CALIDAD QUE SE SIENTE)
+   Separadores verticales + iconos Lucide.
+   ============================================ */
+
+.calidad-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  stroke-width: 2;
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+.calidad-item:hover .calidad-icon {
+  transform: scale(1.08);
+  color: #b2d27f;
+}
+
+.calidad-sep {
+  position: absolute;
+  top: 50%;
+  left: -16px;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+  display: none;
+}
+
+/* Tableta: separadores visibles */
+@media (min-width: 768px) {
+  .calidad-sep {
+    display: block;
+    left: -12px;
+  }
+}
+
+/* Escritorio */
+@media (min-width: 1024px) {
+  .calidad-sep {
+    left: -16px;
+  }
+}

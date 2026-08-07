@@ -1,0 +1,18 @@
+/* ============================================
+   GALERÍA (CADA DETALLE IMPORTA)
+   Tarjetas de detalle con hover premium.
+   ============================================ */
+
+.detalle-img-wrap {
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.detalle-img {
+  transition: transform 0.45s ease;
+}
+.detalle-img-wrap:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 44px -14px rgba(0, 0, 0, 0.25);
+}
+.detalle-img-wrap:hover .detalle-img {
+  transform: scale(1.05);
+}

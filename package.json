@@ -1,0 +1,26 @@
+{
+  "name": "tambo-active",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Landing page Tambo Active - camisetas deportivas premium",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "gsap": "^3.15.0",
+    "lenis": "^1.3.26",
+    "lucide": "^1.29.0",
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.9",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "vite": "^8.2.1"
+  }
+}

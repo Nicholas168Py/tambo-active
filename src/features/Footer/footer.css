@@ -1,0 +1,11 @@
+/* ============================================
+   FOOTER
+   Enlaces e iconos sociales con foco accesible.
+   (La maquetación usa utilidades de Tailwind.)
+   ============================================ */
+
+footer a:focus-visible {
+  outline: 2px solid var(--color-brand-green);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
