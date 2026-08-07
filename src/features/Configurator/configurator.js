@@ -8,7 +8,6 @@ import { store } from '../../core/Store.js';
 import { sectionHeading } from '../../shared/components/SectionHeading.js';
 import { whatsappButton } from '../../shared/components/WhatsAppButton.js';
 import { CHECK_SVG } from '../../shared/icons/index.js';
-import { Configurator3D } from '../../three/Configurator3D.js';
 import template from './configurator.html?raw';
 import './configurator.css';
 
@@ -78,6 +77,9 @@ export class Configurator extends Component {
     this.colorInicial = inicial.color;
     this.logoInicial = inicial.logo;
     this._tres = null;
+    this._observador3D = null;
+    this._destruido = false;
+    this._seleccion = null;
   }
 
   render() {
@@ -119,6 +121,7 @@ export class Configurator extends Component {
     renderColores(colores, this.colorInicial);
     renderLogos(logos, this.logoInicial);
     aplicarModoSeccion(seccion, this.colorInicial);
+    this._seleccion = { color: this.colorInicial, logo: this.logoInicial };
 
     ['config-color', 'config-logo'].forEach((grupo) => {
       $$(`input[name="${grupo}"]`, this.root).forEach((input) => {
@@ -127,18 +130,54 @@ export class Configurator extends Component {
           caption.textContent = etiquetaCombinacion(sel.color, sel.logo, COLORES, LOGOS);
           btn.href = enlaceWhatsApp(sel.color, sel.logo, COLORES, LOGOS);
           store.set('seleccion', sel);
+          this._seleccion = sel;
           if (grupo === 'config-color') aplicarModoSeccion(seccion, sel.color);
           this._tres?.aplicarSeleccion(sel);
         });
       });
     });
 
-    this._tres = new Configurator3D(contenedor3D);
-    this._tres.aplicarSeleccion({ color: this.colorInicial, logo: this.logoInicial });
-    this._tres.montar();
+    this._iniciarCarga3D(contenedor3D);
+  }
+
+  /**
+   * Carga el visor 3D de forma diferida: three.js y el modelo GLB
+   * solo se descargan cuando la sección se acerca al viewport.
+   * @param {HTMLElement} contenedor3D
+   */
+  _iniciarCarga3D(contenedor3D) {
+    const cargar = () => {
+      import('../../three/Configurator3D.js').then(({ Configurator3D }) => {
+        if (this._destruido) return;
+        this._tres = new Configurator3D(contenedor3D);
+        this._tres.aplicarSeleccion(this._seleccion);
+        this._tres.montar();
+      });
+    };
+
+    if (!('IntersectionObserver' in window)) {
+      cargar();
+      return;
+    }
+
+    const observador = new IntersectionObserver(
+      (entradas) => {
+        if (entradas.some((e) => e.isIntersecting)) {
+          observador.disconnect();
+          this._observador3D = null;
+          cargar();
+        }
+      },
+      { rootMargin: '600px 0px' }
+    );
+    this._observador3D = observador;
+    observador.observe(contenedor3D);
   }
 
   destroy() {
+    this._observador3D?.disconnect();
+    this._observador3D = null;
+    this._destruido = true;
     this._tres?.dispose();
     this._tres = null;
     super.destroy();

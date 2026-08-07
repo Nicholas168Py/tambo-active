@@ -4,14 +4,6 @@
    ============================================ */
 
 :root {
-  --color-brand-black: #0c0c0c;
-  --color-brand-dark: #1a1a1a;
   --color-brand-green: #9eb477;
-  --color-brand-green-light: #b2d27f;
-  --color-brand-gray: #f3f4f6;
-  --color-brand-darkgray: #2d2d2d;
-  --color-white: #ffffff;
   --font-family: 'Inter', sans-serif;
-
-  --ease-smooth: 0.3s ease;
 }

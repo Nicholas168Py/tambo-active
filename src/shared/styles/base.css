@@ -7,19 +7,10 @@ body {
   font-family: var(--font-family);
 }
 
-/* Utilidad para gradientes y efectos personalizados */
-.bg-hero-gradient {
-  background: linear-gradient(135deg, #111111 0%, #2a2a2a 100%);
-}
-
 .text-gradient {
   background: linear-gradient(90deg, #9eb477 0%, #b2d27f 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-.shadow-soft {
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
 }
 
 /* Estado de foco visible para enlaces e interactivos */

@@ -19,14 +19,6 @@
   filter: blur(8px);
   pointer-events: none;
 }
-.config-imagen {
-  position: relative;
-  z-index: 1;
-  display: block;
-  width: 100%;
-  height: auto;
-  filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.28)) drop-shadow(0 12px 18px rgba(0, 0, 0, 0.16));
-}
 
 /* Preview 3D (modelo GLB) */
 .config-3d {
@@ -132,19 +124,6 @@
   border-color: #9eb477;
   box-shadow: 0 12px 26px -10px rgba(158, 180, 119, 0.55), 0 6px 16px -8px rgba(0, 0, 0, 0.18);
 }
-.config-logo-ta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  flex-shrink: 0;
-  border-radius: 9999px;
-  border: 2px solid #1a1a1a;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1a1a1a;
-}
 .config-logo-txt {
   font-size: 1.25rem;
   font-weight: 700;
@@ -236,11 +215,6 @@
   }
   .config-logo-card {
     height: 7rem;
-  }
-  .config-logo-ta {
-    width: 3.5rem;
-    height: 3.5rem;
-    font-size: 1.5rem;
   }
   .config-logo-txt {
     font-size: 1.5rem;
