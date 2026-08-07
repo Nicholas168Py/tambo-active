@@ -1,4 +1,5 @@
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import * as THREE from 'three';
 
 /**
@@ -9,11 +10,14 @@ import * as THREE from 'three';
 
 /**
  * Carga un modelo GLB y resuelve con la escena raíz del glTF.
+ * Soporta GLB comprimidos con EXT_meshopt_compression (fallback
+ * transparente para GLB sin comprimir).
  * @param {string} url
  * @returns {Promise<THREE.Group>}
  */
 export function cargarModelo(url) {
   const loader = new GLTFLoader();
+  loader.setMeshoptDecoder(MeshoptDecoder);
   return new Promise((resolver, rechazar) => {
     loader.load(url, (gltf) => resolver(gltf.scene), undefined, rechazar);
   });
