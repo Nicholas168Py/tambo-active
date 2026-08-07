@@ -119,6 +119,11 @@
   box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.1);
   transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
+/* Tarjeta para logos de imagen (blancos sobre fondo oscuro) */
+.config-logo-card--img {
+  background-color: #1f2937;
+  border-color: #374151;
+}
 .config-logo:hover .config-logo-card {
   transform: translateY(-2px);
   box-shadow: 0 8px 18px -8px rgba(0, 0, 0, 0.15);
@@ -153,6 +158,9 @@
   opacity: 0.6;
   transition: opacity 0.25s ease;
 }
+.config-logo-img--grande {
+  height: 4.5rem;
+}
 .config-logo:hover .config-logo-img,
 .config-logo:has(input:checked) .config-logo-img {
   opacity: 1;
@@ -185,6 +193,41 @@
   }
 }
 
+/* Modo oscuro de la sección (cuando se selecciona un color claro) */
+.config-section--oscuro {
+  background-color: #1a1a1a;
+}
+.config-section--oscuro [data-section-heading] h2,
+.config-section--oscuro [data-section-heading] p,
+.config-section--oscuro h3,
+.config-section--oscuro .config-color-label,
+.config-section--oscuro [data-config-caption] {
+  color: #f3f4f6;
+}
+.config-section--oscuro [data-section-heading] p,
+.config-section--oscuro [data-config-caption] {
+  color: #9ca3af;
+}
+.config-section--oscuro .config-color-label {
+  color: #d1d5db;
+}
+.config-section--oscuro .config-color:has(input:checked) .config-color-label {
+  color: #ffffff;
+}
+.config-section--oscuro .config-swatch {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.config-section--oscuro .config-logo-card {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+.config-section--oscuro .config-logo-card:has(.config-logo-txt) {
+  background-color: #111827;
+}
+.config-section--oscuro .config-logo-txt {
+  color: #f3f4f6;
+}
+
 /* Escritorio */
 @media (min-width: 1024px) {
   .config-swatch {
@@ -204,5 +247,8 @@
   }
   .config-logo-img {
     height: 3rem;
+  }
+  .config-logo-img--grande {
+    height: 5.5rem;
   }
 }

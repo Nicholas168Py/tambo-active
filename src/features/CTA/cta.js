@@ -1,10 +1,6 @@
 import { Component } from '../../core/Component.js';
-import { whatsappButton, enlazarWhatsApp } from '../../shared/components/WhatsAppButton.js';
-import { enlaceWhatsApp } from '../../shared/utils/whatsapp.js';
-import { COLORES } from '../../data/colores.js';
-import { LOGOS } from '../../data/logos.js';
-import { COLOR_INICIAL, LOGO_INICIAL } from '../../data/site.js';
-import { store } from '../../core/Store.js';
+import { whatsappButton } from '../../shared/components/WhatsAppButton.js';
+import { enlaceWhatsAppInformacion } from '../../shared/utils/whatsapp.js';
 import template from './cta.html?raw';
 import './cta.css';
 
@@ -13,8 +9,7 @@ const CTA_CLASES =
 
 /**
  * CTA: sección final de llamada a la acción.
- * Su botón de WhatsApp se enlaza a la selección actual del
- * configurador (escucha los cambios del Store).
+ * Su botón de WhatsApp enlaza al mensaje genérico de información.
  */
 export class Cta extends Component {
   constructor() {
@@ -26,20 +21,16 @@ export class Cta extends Component {
     const cta = this.query('[data-cta-cta]');
     if (!cta) return;
 
-    const seleccion = store.get('seleccion') ?? { color: COLOR_INICIAL, logo: LOGO_INICIAL };
     cta.innerHTML = whatsappButton({
       text: 'COMPRAR POR WHATSAPP',
       iconClass: 'w-6 h-6',
       classes: CTA_CLASES,
-      href: enlaceWhatsApp(seleccion.color, seleccion.logo, COLORES, LOGOS)
+      href: enlaceWhatsAppInformacion()
     });
   }
 
   bindEvents() {
     this.observarImagenes();
-
-    const enlace = this.query('[data-cta-cta] a');
-    if (enlace) this._disposers.push(enlazarWhatsApp(enlace));
   }
 
   initAnimations() {

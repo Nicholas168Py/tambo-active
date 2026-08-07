@@ -15,7 +15,16 @@ export function etiquetaCombinacion(colorId, logoId, colores, logos) {
 }
 
 /**
- * Genera el enlace de WhatsApp con el mensaje de la combinación.
+ * Enlace genérico de WhatsApp con mensaje de "quiero más información".
+ * @returns {string}
+ */
+export function enlaceWhatsAppInformacion() {
+  const mensaje = 'Hola Tambo Active, quiero más información';
+  return `https://wa.me/${SITIO.telefonoWa}?text=${encodeURIComponent(mensaje)}`;
+}
+
+/**
+ * Genera el enlace de WhatsApp con el mensaje del pedido de la combinación.
  * @param {string} colorId
  * @param {string} logoId
  * @param {Array} colores
@@ -23,11 +32,10 @@ export function etiquetaCombinacion(colorId, logoId, colores, logos) {
  * @returns {string}
  */
 export function enlaceWhatsApp(colorId, logoId, colores, logos) {
-  const mensaje = `Hola Tambo Active, quiero solicitar la camiseta en color ${etiquetaCombinacion(
-    colorId,
-    logoId,
-    colores,
-    logos
-  )}`;
+  const color = colores.find((c) => c.id === colorId);
+  const logo = logos.find((l) => l.id === logoId);
+  const mensaje = `Hola Tambo Active, quiero realizar el pedido de las camisetas de color ${
+    color ? color.label : colorId
+  } con el logo ${logo ? logo.label : logoId}`;
   return `https://wa.me/${SITIO.telefonoWa}?text=${encodeURIComponent(mensaje)}`;
 }

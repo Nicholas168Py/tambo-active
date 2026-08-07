@@ -2,26 +2,44 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 /**
- * Lights: iluminación elegante de la escena.
- * Ambient + Hemisphere + Directional, más un EnvironmentMap de estudio
- * (PMREM) para reflejos suaves que dan acabado premium sin sombras
- * exageradas.
+ * Lights: iluminación tipo estudio con contraste para revelar el volumen
+ * de la tela (clave para el blanco, que tiende a verse plano).
+ * - Luz principal (key): directional suave desde arriba-izquierda, con
+ *   shadow map que define los pliegues de la tela.
+ * - Luz de relleno: hemisphere MUY suave para no eliminar las sombras.
+ * - Luz de borde (rim): contraluz que separa la prenda del fondo.
+ * El environment map (PMREM) aporta reflejos suaves sin aplanar el mate.
  * @param {THREE.Scene} escena
  * @param {THREE.WebGLRenderer} renderer
- * @returns {{ ambiental: THREE.AmbientLight, hemisferio: THREE.HemisphereLight, direccional: THREE.DirectionalLight }}
+ * @returns {{ principal: THREE.DirectionalLight, relleno: THREE.HemisphereLight, borde: THREE.DirectionalLight }}
  */
 export function crearLuces(escena, renderer) {
-  const ambiental = new THREE.AmbientLight(0xffffff, 0.45);
-  const hemisferio = new THREE.HemisphereLight(0xffffff, 0x1a1a1a, 0.55);
-  const direccional = new THREE.DirectionalLight(0xffffff, 1.1);
-  direccional.position.set(2, 3.5, 4);
+  const principal = new THREE.DirectionalLight(0xffffff, 1.15);
+  principal.position.set(-2.5, 3.5, 4.5);
+  principal.castShadow = true;
+  principal.shadow.mapSize.set(2048, 2048);
+  const sombra = principal.shadow;
+  sombra.camera.left = -1.8;
+  sombra.camera.right = 1.8;
+  sombra.camera.top = 1.8;
+  sombra.camera.bottom = -1.8;
+  sombra.camera.near = 0.5;
+  sombra.camera.far = 12;
+  sombra.bias = -0.0004;
+  sombra.normalBias = 0.02;
+  sombra.radius = 4;
 
-  escena.add(ambiental, hemisferio, direccional);
+  const relleno = new THREE.HemisphereLight(0xffffff, 0x141414, 0.3);
+
+  const borde = new THREE.DirectionalLight(0xcfe0ff, 0.55);
+  borde.position.set(-3, 1.5, -4);
+
+  escena.add(principal, relleno, borde);
 
   const entorno = generarEntorno(renderer);
   if (entorno) escena.environment = entorno;
 
-  return { ambiental, hemisferio, direccional };
+  return { principal, relleno, borde };
 }
 
 /**

@@ -3,10 +3,11 @@ import * as THREE from 'three';
 const DPR_MAX = 2;
 
 /**
- * Renderer: renderizador WebGL transparente y optimizado.
- * - Fondo transparente (alpha) para integrarse con la landing.
- * - Pixel ratio limitado para rendimiento en pantallas de alta densidad.
- * - Tone mapping cinematográfico para un acabado premium.
+ * Renderer: renderizador WebGL optimizado con acabado premium.
+ * - Antialiasing activado.
+ * - Tone mapping ACESFilmic con exposición de estudio.
+ * - Espacio de color sRGB para colores fieles.
+ * - Shadow maps suaves (PCFSoft) para sombras realistas de la tela.
  * @param {HTMLElement} contenedor
  * @returns {THREE.WebGLRenderer}
  */
@@ -21,7 +22,9 @@ export function crearRenderer(contenedor) {
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
+  renderer.toneMappingExposure = 1.05;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   renderer.domElement.classList.add('config-3d-canvas');
   contenedor.appendChild(renderer.domElement);
