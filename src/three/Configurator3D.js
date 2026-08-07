@@ -77,10 +77,18 @@ export class Configurator3D {
       this._escena.add(modelo);
 
       aplicarAcabadoTela(modelo);
-      if (this._seleccion) this._aplicarSeleccion(this._seleccion);
 
       const caja = centrarModelo(modelo);
       this._caja = caja;
+
+      // Precalcula el anclaje del logo en el pecho con el modelo centrado y
+      // sin transformaciones (la intro aún no ha modificado escala/rotación).
+      // El cálculo es asíncrono cuando llega la textura; al precachearlo aquí
+      // se evita que el raycast y el AABB usen un modelo girado/escalado.
+      this._obtenerFrenteReducido();
+
+      if (this._seleccion) this._aplicarSeleccion(this._seleccion);
+
       const { distancia } = ajustarCamaraAlModelo(this._camara, caja);
       this._controles.minDistance = distancia * 0.82;
       this._controles.maxDistance = distancia * 1.28;
