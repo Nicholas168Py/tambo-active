@@ -44,7 +44,7 @@ export class Gallery extends Component {
     const heading = this.query('#detalles [data-reveal]');
     if (heading) this.revelarElemento(heading);
 
-    const grid = this.query('#detalles .grid');
+    const grid = this.query('#detalles .flex-wrap');
     if (grid) this.revelarGrupo(grid, ':scope > div', { y: 30, stagger: 0.07 });
   }
 }
