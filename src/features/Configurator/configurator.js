@@ -20,8 +20,9 @@ function contenidoLogo(logo) {
   if (logo.tipo !== 'imagen' || !logo.src) {
     return `<span class="config-logo-txt">${logo.label}</span>`;
   }
-  const extra = logo.tamanoMax ? ' config-logo-img--grande' : '';
-  return `<img src="${logo.src}" alt="${logo.label}" class="config-logo-img${extra}" loading="lazy" decoding="async" />`;
+  const estilos = logo.altoDisp ? ` style="height:${logo.altoDisp}px"` : '';
+  const extra = !logo.altoDisp && logo.tamanoMax ? ' config-logo-img--grande' : '';
+  return `<img src="${logo.src}" alt="${logo.label}" class="config-logo-img${extra}"${estilos} loading="lazy" decoding="async" />`;
 }
 
 function renderColores(contenedor, colorInicial) {
@@ -155,6 +156,8 @@ export class Configurator extends Component {
       });
     };
 
+    this._precargar3D();
+
     if (!('IntersectionObserver' in window)) {
       cargar();
       return;
@@ -172,6 +175,29 @@ export class Configurator extends Component {
     );
     this._observador3D = observador;
     observador.observe(contenedor3D);
+  }
+
+  /**
+   * Precarga el visor 3D en tiempo idle: descarga three.js y el GLB apenas
+   * la página termina de cargar, sin crear el renderer ni bloquear el primer
+   * paint. Cuando el usuario llega a la sección, el modelo ya está en caché
+   * y la vista previa aparece al instante.
+   */
+  _precargar3D() {
+    const enIdle = (cb) => {
+      if ('requestIdleCallback' in window) requestIdleCallback(cb, { timeout: 3000 });
+      else setTimeout(cb, 100);
+    };
+    const arrancar = () => {
+      enIdle(() => {
+        if (this._destruido) return;
+        import('../../three/Configurator3D.js')
+          .then(({ rutaModelo }) => fetch(rutaModelo).catch(() => {}))
+          .catch(() => {});
+      });
+    };
+    if (document.readyState === 'complete') arrancar();
+    else window.addEventListener('load', arrancar, { once: true });
   }
 
   destroy() {

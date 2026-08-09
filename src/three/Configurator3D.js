@@ -11,11 +11,15 @@ import { COLORES } from '../data/colores.js';
 import { LOGOS } from '../data/logos.js';
 import rutaModelo from '../assets/models/camisa.glb';
 
+export { rutaModelo };
+
 const FOTOGRAFIAS_TRAS_INTERACCION = 26;
-const LOGO_ALTURA_PECHO = 0.75;
-const LOGO_X_PECHO = 0.27;
+const LOGO_ALTURA_PECHO = 0.73;
+const LOGO_X_PECHO = 0.23;
 const LOGO_TAMANO_MAX = 0.16;
 const LOGO_ESPESOR = 0.15;
+const LOGO_DESPLAZAMIENTO = 0.01;
+const LOGO_LIFT = 0.04;
 const PECHO_EXPANSION = 0.22;
 const PECHO_PROFUNDIDAD = 0.2;
 
@@ -85,7 +89,22 @@ export class Configurator3D {
       // sin transformaciones (la intro aún no ha modificado escala/rotación).
       // El cálculo es asíncrono cuando llega la textura; al precachearlo aquí
       // se evita que el raycast y el AABB usen un modelo girado/escalado.
-      this._obtenerFrenteReducido();
+      const frente = this._obtenerFrenteReducido();
+      if (frente) {
+        console.info(
+          `[Configurator3D][Logo] Frente del pecho listo (${Math.round(frente.geometry.attributes.position.count / 3)} triángulos).`
+        );
+      } else {
+        console.error('[Configurator3D][Logo] No se pudo preparar el frente del pecho.');
+      }
+      const mallaInfo = this._modelo.getObjectByProperty('isMesh', true);
+      if (mallaInfo) {
+        console.info('[Configurator3D] Malla del modelo:', {
+          pos: mallaInfo.position.toArray(),
+          scale: mallaInfo.scale.toArray(),
+          verts: mallaInfo.geometry.attributes.position.count
+        });
+      }
 
       if (this._seleccion) this._aplicarSeleccion(this._seleccion);
 
@@ -107,7 +126,7 @@ export class Configurator3D {
 
       this.contenedor.dataset.modeloListo = 'true';
       this._solicitarRender();
-      if (import.meta.env.DEV) window.__tambo3D = this;
+      window.__tambo3D = this;
     } catch (error) {
       console.error('[Configurator3D] No se pudo cargar el modelo:', error);
       this.contenedor.dataset.modeloError = 'true';
@@ -147,18 +166,30 @@ export class Configurator3D {
    */
   _aplicarLogo(logoId) {
     this._logoIdActual = logoId;
-    if (!this._modelo) return;
+    if (!this._modelo) {
+      console.warn('[Configurator3D][Logo] Selección recibida sin modelo cargado; se aplicará al cargar.');
+      return;
+    }
 
     const logo = LOGOS.find((l) => l.id === logoId);
     if (!logo || !logo.src) {
+      console.warn('[Configurator3D][Logo] Logo no encontrado o sin src:', logoId);
       this._quitarLogo();
       return;
     }
 
-    this._cargarTextoLogo(logo.src).then((texto) => {
-      if (this._destruido || this._logoIdActual !== logoId || !this._modelo) return;
-      this._colocarLogo(texto, logo.tamanoMax);
-    });
+    this._cargarTextoLogo(logo.src)
+      .then((texto) => {
+        if (this._destruido || this._logoIdActual !== logoId || !this._modelo) return;
+        this._colocarLogo(texto, logo.tamanoMax);
+      })
+      .catch((error) => {
+        console.error('[Configurator3D][Logo] Falló la carga de la textura del logo:', {
+          logoId,
+          url: logo.src
+        }, error);
+        this._quitarLogo();
+      });
   }
 
   /**
@@ -204,6 +235,7 @@ export class Configurator3D {
 
     const decal = this._obtenerDecal(ancho, alto);
     if (!decal) {
+      console.error('[Configurator3D][Logo] No se pudo generar el decal para el logo.');
       this._quitarLogo();
       return;
     }
@@ -226,6 +258,9 @@ export class Configurator3D {
     this._logoMaterial.map = texto;
     this._logoMaterial.needsUpdate = true;
     this._logoMalla.visible = true;
+    console.info(
+      `[Configurator3D][Logo] Logo "${this._logoIdActual}" colocado (${decal.attributes.position.count} vértices)`
+    );
     this._solicitarRender();
   }
 
@@ -239,11 +274,31 @@ export class Configurator3D {
     const clave = ancho.toFixed(4) + 'x' + alto.toFixed(4);
     if (!this._decalGeometrias.has(clave)) {
       const frente = this._obtenerFrenteReducido();
-      if (!frente) return null;
-      this._decalGeometrias.set(
-        clave,
-        new DecalGeometry(frente, this._posicionLogo, this._orientacionLogo, new THREE.Vector3(ancho, alto, LOGO_ESPESOR))
-      );
+      if (!frente) {
+        console.error('[Configurator3D][Logo] Sin malla frontal (pecho) para el decal.');
+        return null;
+      }
+      const decal = new DecalGeometry(frente, this._posicionLogo, this._orientacionLogo, new THREE.Vector3(ancho, alto, LOGO_ESPESOR));
+      if (!decal.attributes.position.count) {
+        console.error('[Configurator3D][Logo] Decal generado sin vértices.');
+        return null;
+      }
+      // Levanta los vértices del decal a lo largo de sus normales para que
+      // quede sobre la tela: sin esto, el decal comparte plano con la
+      // superficie y la tela gana el depth test (el logo no se ve).
+      if (LOGO_LIFT > 0) {
+        const posiciones = decal.attributes.position;
+        const normales = decal.attributes.normal;
+        const pArr = posiciones.array;
+        const nArr = normales?.array;
+        for (let i = 0; i < pArr.length; i += 3) {
+          pArr[i] += nArr[i] * LOGO_LIFT;
+          pArr[i + 1] += nArr[i + 1] * LOGO_LIFT;
+          pArr[i + 2] += nArr[i + 2] * LOGO_LIFT;
+        }
+        posiciones.needsUpdate = true;
+      }
+      this._decalGeometrias.set(clave, decal);
     }
     return this._decalGeometrias.get(clave);
   }
@@ -258,31 +313,58 @@ export class Configurator3D {
     if (this._frenteReducido) return this._frenteReducido;
 
     const malla = this._modelo.getObjectByProperty('isMesh', true);
-    if (!malla) return null;
+    if (!malla) {
+      console.error('[Configurator3D][Logo] El modelo no tiene ninguna malla.');
+      return null;
+    }
 
     const geo = malla.geometry;
     const pos = geo.attributes.position;
     const normal = geo.attributes.normal;
     const indice = geo.index;
-    if (!pos || !indice) return null;
+    if (!pos || !indice) {
+      console.error('[Configurator3D][Logo] Geometría sin posición o sin índices.', {
+        pos: !!pos,
+        index: !!indice
+      });
+      return null;
+    }
+
+    // Matriz que lleva la geometría local de la malla al espacio local del
+    // modelo (el GLB comprimido puede traer un nodo de malla escalado/desplazado).
+    const geoALocal = new THREE.Matrix4()
+      .copy(malla.matrixWorld)
+      .multiply(new THREE.Matrix4().copy(this._modelo.matrixWorld).invert());
+    const normalMatriz = new THREE.Matrix3().getNormalMatrix(geoALocal);
 
     const cajaMundo = new THREE.Box3().setFromObject(this._modelo);
     const yCentro = cajaMundo.min.y + (cajaMundo.max.y - cajaMundo.min.y) * LOGO_ALTURA_PECHO;
 
     this._raycaster.set(new THREE.Vector3(LOGO_X_PECHO, yCentro, 20), new THREE.Vector3(0, 0, -1));
     const golpes = this._raycaster.intersectObject(this._modelo, true);
-    if (!golpes.length) return null;
+    if (!golpes.length) {
+      console.error('[Configurator3D][Logo] El raycast no encontró el pecho del modelo.', {
+        yCentro,
+        cajaMundo: { min: cajaMundo.min.toArray(), max: cajaMundo.max.toArray() }
+      });
+      return null;
+    }
     const golpe = golpes[0];
+    const normalGolpe = golpe.face.normal.clone().normalize();
 
     this._posicionLogo = new THREE.Vector3(
       LOGO_X_PECHO - this._modelo.position.x,
       yCentro - this._modelo.position.y,
       golpe.point.z - this._modelo.position.z
     );
-    this._orientacionLogo = new THREE.Quaternion().setFromUnitVectors(
-      new THREE.Vector3(0, 0, 1),
-      golpe.face.normal.clone().normalize()
+    // DecalGeometry construye su proyector con makeRotationFromEuler, que
+    // NO acepta Quaternions (sin branch por defecto deja la matriz identidad).
+    // Se le pasa un Euler real para que el logo quede alineado a la superficie.
+    this._orientacionLogo = new THREE.Euler().setFromQuaternion(
+      new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), normalGolpe)
     );
+    // Separa el decal de la tela para evitar z-fighting.
+    this._posicionLogo.addScaledVector(normalGolpe, LOGO_DESPLAZAMIENTO);
 
     const aabbMin = new THREE.Vector3(
       LOGO_X_PECHO - PECHO_EXPANSION,
@@ -300,15 +382,18 @@ export class Configurator3D {
     const a = new THREE.Vector3();
     const b = new THREE.Vector3();
     const c = new THREE.Vector3();
+    const vNormal = new THREE.Vector3();
+    const vCara = new THREE.Vector3();
+    const vCara2 = new THREE.Vector3();
     const nTri = indice.count / 3;
 
     for (let t = 0; t < nTri; t++) {
       const i0 = indice.getX(t * 3);
       const i1 = indice.getX(t * 3 + 1);
       const i2 = indice.getX(t * 3 + 2);
-      a.fromBufferAttribute(pos, i0);
-      b.fromBufferAttribute(pos, i1);
-      c.fromBufferAttribute(pos, i2);
+      a.fromBufferAttribute(pos, i0).applyMatrix4(geoALocal);
+      b.fromBufferAttribute(pos, i1).applyMatrix4(geoALocal);
+      c.fromBufferAttribute(pos, i2).applyMatrix4(geoALocal);
 
       const minX = Math.min(a.x, b.x, c.x);
       const maxX = Math.max(a.x, b.x, c.x);
@@ -320,17 +405,30 @@ export class Configurator3D {
         continue;
       }
 
-      verts.push(pos.getX(i0), pos.getY(i0), pos.getZ(i0));
-      verts.push(pos.getX(i1), pos.getY(i1), pos.getZ(i1));
-      verts.push(pos.getX(i2), pos.getY(i2), pos.getZ(i2));
+      // Descarta los triángulos de la cara interior de la tela: solo se pega
+      // el logo sobre la superficie exterior del pecho.
+      vCara.subVectors(b, a).cross(vCara2.subVectors(c, a));
+      if (vCara.dot(normalGolpe) <= 0) continue;
+
+      verts.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
       if (normal) {
-        normales.push(normal.getX(i0), normal.getY(i0), normal.getZ(i0));
-        normales.push(normal.getX(i1), normal.getY(i1), normal.getZ(i1));
-        normales.push(normal.getX(i2), normal.getY(i2), normal.getZ(i2));
+        for (const idx of [i0, i1, i2]) {
+          vNormal.fromBufferAttribute(normal, idx).applyMatrix3(normalMatriz).normalize();
+          normales.push(vNormal.x, vNormal.y, vNormal.z);
+        }
       }
     }
 
-    if (!verts.length) return null;
+    if (!verts.length) {
+      console.error('[Configurator3D][Logo] No se hallaron triángulos en la zona del pecho.', {
+        posicionLogo: this._posicionLogo?.toArray(),
+        aabbMin: aabbMin.toArray(),
+        aabbMax: aabbMax.toArray(),
+        indice: indice.count,
+        pos: pos.count
+      });
+      return null;
+    }
 
     const reducida = new THREE.BufferGeometry();
     reducida.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
@@ -386,6 +484,29 @@ export class Configurator3D {
       }
     };
     this._raf = requestAnimationFrame(ciclo);
+  }
+
+  /**
+   * Diagnóstico del logo para depuración en consola.
+   * Llamalo desde DevTools: `__tambo3D.diagnosticoLogo()`.
+   * @returns {object} Estado completo del pipeline del logo.
+   */
+  diagnosticoLogo() {
+    const frente = this._frenteReducido;
+    const malla = this._modelo?.getObjectByProperty('isMesh', true);
+    return {
+      modelo: !!this._modelo,
+      malla: malla ? { verts: malla.geometry.attributes.position?.count, pos: malla.position.toArray(), scale: malla.scale.toArray() } : null,
+      logoIdActual: this._logoIdActual,
+      logoVisible: this._logoMalla ? this._logoMalla.visible : null,
+      logoVertices: this._logoMalla?.geometry?.attributes?.position?.count ?? null,
+      frenteReducido: frente ? { triangulos: Math.round(frente.geometry.attributes.position.count / 3) } : null,
+      posicionLogo: this._posicionLogo?.toArray() ?? null,
+      orientacionLogo: this._orientacionLogo instanceof THREE.Euler
+        ? new THREE.Quaternion().setFromEuler(this._orientacionLogo).toArray()
+        : this._orientacionLogo?.toArray() ?? null,
+      decalGeometrias: [...this._decalGeometrias.keys()].map((k) => `${k} (${this._decalGeometrias.get(k).attributes.position.count} v)`)
+    };
   }
 
   /**

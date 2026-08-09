@@ -39,6 +39,51 @@
   cursor: grabbing;
 }
 
+/* Estado de carga del visor 3D */
+.config-3d-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: rgba(244, 246, 245, 0.55);
+  transition: opacity 0.4s ease;
+}
+.config-3d[data-modelo-listo] .config-3d-loading {
+  opacity: 0;
+  pointer-events: none;
+}
+.config-3d-loading-text {
+  color: #6b7280;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+}
+.config-3d-loading-text::after {
+  content: 'Preparando vista previa 3D…';
+}
+.config-3d[data-modelo-error] .config-3d-spinner {
+  display: none;
+}
+.config-3d[data-modelo-error] .config-3d-loading-text::after {
+  content: 'No se pudo cargar la vista previa 3D.';
+}
+.config-3d-spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  border: 3px solid rgba(0, 0, 0, 0.12);
+  border-top-color: #9eb477;
+  animation: config-spin 0.8s linear infinite;
+}
+@keyframes config-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Selector de color */
 .config-swatch {
   display: flex;
@@ -152,12 +197,26 @@
   outline-offset: 3px;
 }
 
-/* Móvil: mantener el modelo centrado y reducir únicamente la escala */
+/* Móvil: mantener el modelo centrado y reducir únicamente la escala.
+   Los logos se muestran en una fila para facilitar su uso. */
 @media (max-width: 639px) {
   .config-3d {
     width: 84%;
     margin-left: auto;
     margin-right: auto;
+  }
+  .config-logo {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .config-logo-card {
+    height: 4.5rem;
+    padding: 0 0.25rem;
+  }
+  .config-logo-img,
+  .config-logo-img--grande {
+    max-height: 3rem;
+    height: 3rem;
   }
 }
 
