@@ -1,5 +1,5 @@
 import adidasUrl from '../assets/models/Adidas-Logo-w.png';
-import nikeUrl from '../assets/models/Logo_NIKE.svg';
+import nikeUrl from '../assets/models/Logo_NIKE.png';
 import tamboUrl from '../assets/models/Tambo-Logo-w.png';
 
 /**
