@@ -1,75 +1,83 @@
 <!-- BEGIN: Hero Section -->
-<section class="relative bg-brand-black min-h-screen flex items-center overflow-hidden pt-24 pb-12 lg:pt-28 lg:pb-16">
-  <!-- Layer 1-2: dark gradients -->
-  <div class="hero-bg absolute inset-0" aria-hidden="true"></div>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
-      <!-- Text Content -->
-      <div class="text-center lg:text-left">
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-5" data-hero>
-          UNA CAMISETA.<br />
-          TODOS LOS DÍAS.<br />
-          <span class="text-gradient">TODO EL ESTILO.</span>
-        </h1>
-        <p class="text-base md:text-lg text-gray-400 mb-6 max-w-2xl mx-auto lg:mx-0" data-hero>
-          Camiseta deportiva premium de alto gramaje.<br />
-          Diseñada para rendir al máximo y acompañarte<br />
-          en cualquier momento.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start" data-hero>
-          <div class="contents" data-cta-hero></div>
-          <a class="inline-flex items-center justify-center px-8 py-4 rounded-full text-white border border-white/20 font-medium text-lg hover:bg-white/10 transition-all duration-300 gap-2"
-            href="#colores">
-            VER COLORES
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-              <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-            </svg>
-          </a>
-        </div>
-        <!-- Features -->
-        <div class="mt-10 grid grid-cols-2 md:grid-cols-4 gap-5 text-center border-t border-white/10 pt-6"
-          data-hero>
-          <div>
-            <div class="hero-feature-icon w-10 h-10 mx-auto mb-2 flex items-center justify-center text-white">
-              <i data-lucide="layers" class="w-6 h-6"></i>
-            </div>
-            <p class="text-white text-sm font-medium">Tela Premium</p>
-          </div>
-          <div>
-            <div class="hero-feature-icon w-10 h-10 mx-auto mb-2 flex items-center justify-center text-white">
-              <i data-lucide="wind" class="w-6 h-6"></i>
-            </div>
-            <p class="text-white text-sm font-medium">Transpirable</p>
-          </div>
-          <div>
-            <div class="hero-feature-icon w-10 h-10 mx-auto mb-2 flex items-center justify-center text-white">
-              <i data-lucide="shirt" class="w-6 h-6"></i>
-            </div>
-            <p class="text-white text-sm font-medium">Ajuste Cómodo</p>
-          </div>
-          <div>
-            <div class="hero-feature-icon w-10 h-10 mx-auto mb-2 flex items-center justify-center text-white">
-              <i data-lucide="spool" class="w-6 h-6"></i>
-            </div>
-            <p class="text-white text-sm font-medium">Costuras Reforzadas</p>
-          </div>
+<section class="bg-brand-black text-white relative overflow-hidden min-h-screen flex items-center pt-20 sm:pt-24 lg:pt-28">
+  <div class="grid grid-cols-1 lg:grid-cols-2 w-full min-h-[calc(100vh-5rem)] sm:min-h-[calc(100vh-6rem)] lg:min-h-[calc(100vh-7rem)] items-center">
+    <!-- Left Column: Image with gradient overlay -->
+    <div class="h-96 sm:h-[480px] lg:h-full min-h-[400px] relative overflow-hidden">
+      <img alt="Entrenando con Tambo Active" class="w-full h-full object-cover object-center" fetchpriority="high" decoding="async"
+        src="/Corredor.webp" />
+      <div class="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/40 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-brand-black/40 lg:to-brand-black"></div>
+    </div>
+
+    <!-- Right Column: Content with Hero Info -->
+    <div class="flex flex-col justify-center p-8 sm:p-12 lg:p-16 xl:p-20 relative z-10" data-hero>
+      <!-- Title -->
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-5" data-hero>
+        UNA CAMISETA.<br />
+        TODOS LOS DÍAS.<br />
+        <span class="text-white">TODO EL ESTILO.</span>
+      </h1>
+
+      <!-- Description -->
+      <p class="text-gray-300 mb-6 text-base md:text-lg max-w-lg leading-relaxed" data-hero>
+        Camiseta deportiva premium de alta calidad.<br />
+        Diseñada para rendir al máximo y acompañarte en cualquier momento.
+      </p>
+
+      <!-- Pricing & Shipping Pill -->
+      <div class="flex justify-start mb-8" data-hero>
+        <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 border border-white/15 backdrop-blur-md shadow-inner">
+          <span class="text-white font-extrabold text-lg sm:text-xl tracking-tight" data-hero-price>$50.000 COP</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-neutral-400"></span>
+          <span class="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="truck" class="w-4 h-4 text-white"></i>
+            Envío a toda Colombia
+          </span>
         </div>
       </div>
-      <!-- Hero Visual -->
-      <div class="hero-visual" data-hero>
-        <!-- Layer 3: humo y niebla -->
-        <div class="hero-atmosphere" aria-hidden="true">
-          <div class="hero-fog hero-fog-1"></div>
-          <div class="hero-fog hero-fog-2"></div>
-          <div class="hero-smoke hero-smoke-1"></div>
-          <div class="hero-smoke hero-smoke-2"></div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 mb-10" data-hero>
+        <a class="inline-flex items-center justify-center px-8 py-4 rounded-full text-black bg-white hover:bg-neutral-200 font-extrabold text-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 gap-2 shadow-lg shadow-white/10"
+          href="#colores" data-hero-cta-primary>
+          Personalizar y Comprar
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+          </svg>
+        </a>
+        <a class="inline-flex items-center justify-center px-8 py-4 rounded-full text-white border border-white/20 font-medium text-lg hover:bg-white/10 transition-all duration-300 gap-2"
+          href="#colores">
+          VER COLORES
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Features / Beneficios -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center border-t border-white/10 pt-6" data-hero>
+        <div>
+          <div class="hero-feature-icon w-10 h-10 mx-auto mb-2 flex items-center justify-center text-white">
+            <i data-lucide="layers" class="w-6 h-6"></i>
+          </div>
+          <p class="text-white text-xs sm:text-sm font-medium">Tela Premium</p>
         </div>
-        <!-- Layer 4-6: glow, sombra y camiseta -->
-        <div class="hero-shirt-wrap">
-          <div class="hero-glow" aria-hidden="true"></div>
-          <div class="hero-floor-shadow" aria-hidden="true"></div>
-          <img alt="Camiseta Tambo Active negra" class="hero-shirt" fetchpriority="high" decoding="async"
-            src="/hero/camisa-hero.png" />
+        <div>
+          <div class="hero-feature-icon w-10 h-10 mx-auto mb-2 flex items-center justify-center text-white">
+            <i data-lucide="wind" class="w-6 h-6"></i>
+          </div>
+          <p class="text-white text-xs sm:text-sm font-medium">Transpirable</p>
+        </div>
+        <div>
+          <div class="hero-feature-icon w-10 h-10 mx-auto mb-2 flex items-center justify-center text-white">
+            <i data-lucide="shirt" class="w-6 h-6"></i>
+          </div>
+          <p class="text-white text-xs sm:text-sm font-medium">Ajuste Cómodo</p>
+        </div>
+        <div>
+          <div class="hero-feature-icon w-10 h-10 mx-auto mb-2 flex items-center justify-center text-white">
+            <i data-lucide="spool" class="w-6 h-6"></i>
+          </div>
+          <p class="text-white text-xs sm:text-sm font-medium">Costuras Reforzadas</p>
         </div>
       </div>
     </div>

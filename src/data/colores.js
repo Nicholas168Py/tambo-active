@@ -1,12 +1,12 @@
 /**
- * Colores disponibles en el configurador.
+ * Colores base oficiales disponibles para todos los modelos.
  * @type {{ id: string, label: string, hex: string }[]}
  */
 export const COLORES = [
-  { id: 'blanco', label: 'Blanco', hex: '#dadada' },
-  { id: 'azul', label: 'Azul', hex: '#172349' },
   { id: 'negro', label: 'Negro', hex: '#111111' },
-  { id: 'gris', label: 'Gris Jaspeado', hex: '#3f4043' },
-  { id: 'verde-oliva', label: 'Verde Oliva', hex: '#58612a' },
-  { id: 'gris-claro', label: 'Gris Claro', hex: '#858B93' }
+  { id: 'blanco', label: 'Blanco', hex: '#dadada' },
+  { id: 'azul-oscuro', label: 'Azul Oscuro', hex: '#172349' },
+  { id: 'verde-militar', label: 'Verde Militar', hex: '#4B5320' },
+  { id: 'gris-claro', label: 'Gris Claro', hex: '#858B93' },
+  { id: 'gris-oscuro', label: 'Gris Oscuro', hex: '#3f4043' }
 ];

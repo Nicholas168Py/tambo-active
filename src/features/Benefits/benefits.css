@@ -21,9 +21,13 @@
   transform: translateY(-50%);
   width: 1px;
   height: 100px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.08);
   pointer-events: none;
   display: none;
+}
+
+html.dark .calidad-sep {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* Tableta: separadores visibles */

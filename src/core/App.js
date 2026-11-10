@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { COLOR_INICIAL, LOGO_INICIAL } from '../data/site.js';
 import { MainLayout } from '../layouts/MainLayout.js';
 import { NotFound } from '../shared/components/NotFound/notfound.js';
+import { getProducts } from '../services/shopify.js';
 
 /**
  * App: bootstrap de la aplicación.
@@ -24,10 +25,19 @@ export class App {
   }
 
   init() {
-    initSmoothScroll();
+    window.__lenis = initSmoothScroll();
 
     // Estado compartido: selección por defecto del configurador.
     store.set('seleccion', { color: COLOR_INICIAL, logo: LOGO_INICIAL });
+
+    // Verificación de conexión a Shopify al cargar la aplicación
+    getProducts()
+      .then((productos) => {
+        console.log('✅ Conexión exitosa. Productos de Shopify:', productos);
+      })
+      .catch((error) => {
+        console.error('❌ Error al consultar Shopify:', error);
+      });
 
     this.router = new Router({
       container: this.root,

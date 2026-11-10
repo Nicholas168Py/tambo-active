@@ -5,7 +5,7 @@ import template from './cta.html?raw';
 import './cta.css';
 
 const CTA_CLASES =
-  'self-start mb-12 inline-flex items-center justify-center px-8 py-4 rounded-full text-brand-black bg-brand-green font-bold text-lg hover:bg-opacity-90 transition-all duration-300 gap-2 shadow-lg shadow-brand-green/20';
+  'self-start inline-flex items-center justify-center px-8 py-4 rounded-full text-black bg-white hover:bg-neutral-200 font-extrabold text-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 gap-2 shadow-lg shadow-white/10';
 
 /**
  * CTA: sección final de llamada a la acción.
@@ -21,12 +21,23 @@ export class Cta extends Component {
     const cta = this.query('[data-cta-cta]');
     if (!cta) return;
 
-    cta.innerHTML = whatsappButton({
-      text: 'COMPRAR POR WHATSAPP',
-      iconClass: 'w-6 h-6',
-      classes: CTA_CLASES,
-      href: enlaceWhatsAppInformacion()
-    });
+    cta.innerHTML = `
+      <div class="flex flex-col sm:flex-row gap-4 mb-12">
+        <a href="#colores" class="${CTA_CLASES}">
+          <span>Personalizar y Comprar</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+          </svg>
+        </a>
+        ${whatsappButton({
+          text: '¿Dudas? WhatsApp',
+          iconClass: 'w-5 h-5',
+          classes:
+            'inline-flex items-center justify-center px-6 py-4 rounded-full text-white border border-white/20 font-semibold text-sm hover:bg-white/10 transition-all duration-300 gap-2',
+          href: enlaceWhatsAppInformacion()
+        })}
+      </div>
+    `;
   }
 
   bindEvents() {

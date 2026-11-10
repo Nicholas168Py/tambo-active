@@ -1,86 +1,27 @@
 import { Component } from '../../core/Component.js';
-import { $$ } from '../../shared/utils/dom.js';
 import { COLORES } from '../../data/colores.js';
-import { LOGOS } from '../../data/logos.js';
 import { COLOR_INICIAL, LOGO_INICIAL } from '../../data/site.js';
-import { enlaceWhatsApp, etiquetaCombinacion } from '../../shared/utils/whatsapp.js';
 import { store } from '../../core/Store.js';
 import { sectionHeading } from '../../shared/components/SectionHeading.js';
-import { whatsappButton } from '../../shared/components/WhatsAppButton.js';
-import { CHECK_SVG } from '../../shared/icons/index.js';
+import { renderIcons } from '../../shared/utils/icons.js';
 import template from './configurator.html?raw';
 import './configurator.css';
 
-const CTA_CLASES =
-  'inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-brand-green text-brand-black font-bold text-sm transition-all duration-300 shadow-lg shadow-brand-green/20 hover:bg-opacity-90 hover:-translate-y-0.5';
-
-const COLORES_CLAROS = new Set(['blanco', 'gris-claro']);
-
-function contenidoLogo(logo) {
-  if (logo.tipo !== 'imagen' || !logo.src) {
-    return `<span class="config-logo-txt">${logo.label}</span>`;
-  }
-  const estilos = logo.altoDisp ? ` style="height:${logo.altoDisp}px"` : '';
-  const extra = !logo.altoDisp && logo.tamanoMax ? ' config-logo-img--grande' : '';
-  return `<img src="${logo.src}" alt="${logo.label}" class="config-logo-img${extra}"${estilos} loading="lazy" decoding="async" />`;
-}
-
-function renderColores(contenedor, colorInicial) {
-  contenedor.innerHTML = COLORES.map(
-    (color) =>
-      '<label class="config-color block cursor-pointer text-center">' +
-      `<input type="radio" name="config-color" value="${color.id}" class="sr-only"` +
-      (color.id === colorInicial ? ' checked' : '') +
-      '>' +
-      `<span class="config-swatch" style="background-color:${color.hex}">` +
-      `<span class="config-check">${CHECK_SVG}</span>` +
-      '</span>' +
-      `<span class="config-color-label">${color.label}</span>` +
-      '</label>'
-  ).join('');
-}
-
-function renderLogos(contenedor, logoInicial) {
-  contenedor.innerHTML = LOGOS.map(
-    (logo) =>
-      '<label class="config-logo relative block cursor-pointer">' +
-      `<input type="radio" name="config-logo" value="${logo.id}" class="sr-only"` +
-      (logo.id === logoInicial ? ' checked' : '') +
-      '>' +
-      `<div class="config-logo-card${logo.tipo === 'imagen' ? ' config-logo-card--img' : ' bg-white'}">${contenidoLogo(logo)}</div>` +
-      `<span class="config-check absolute top-3 right-3">${CHECK_SVG}</span>` +
-      '</label>'
-  ).join('');
-}
-
-function aplicarModoSeccion(seccion, colorId) {
-  seccion.classList.toggle('config-section--oscuro', COLORES_CLAROS.has(colorId));
-}
-
-function seleccionActual(contexto = document) {
-  const color = contexto.querySelector('input[name="config-color"]:checked');
-  const logo = contexto.querySelector('input[name="config-logo"]:checked');
-  return {
-    color: color ? color.value : COLOR_INICIAL,
-    logo: logo ? logo.value : LOGO_INICIAL
-  };
-}
-
 /**
- * Configurator: personalización de color y logo con vista previa 3D.
- * Consume los datos desde `data/colores.js` y `data/logos.js`;
- * publica la selección en el Store y mantiene la vista previa 3D.
+ * Configurator: Visualizador y catálogo 3D interactivo para explorar prendas y colores.
+ * La compra transaccional está centralizada exclusivamente en los combos y su modal.
  */
 export class Configurator extends Component {
   constructor() {
     super(template, { mount: '#app' });
     const inicial = store.get('seleccion') ?? { color: COLOR_INICIAL, logo: LOGO_INICIAL };
-    this.colorInicial = inicial.color;
-    this.logoInicial = inicial.logo;
+    this.colorSeleccionado = inicial.color || 'negro';
+    this.tipoPrenda = 'CAMISETA';
+
     this._tres = null;
     this._observador3D = null;
     this._destruido = false;
-    this._seleccion = null;
+    this._seleccion = { color: this.colorSeleccionado, logo: 'tambo' };
   }
 
   render() {
@@ -89,61 +30,112 @@ export class Configurator extends Component {
     const heading = this.query('[data-section-heading]');
     if (heading) {
       heading.innerHTML = sectionHeading({
-        title: 'Elige tu combinación',
-        subtitle: 'Personaliza tu camiseta: elige color y logo, la vista previa se actualiza al instante.',
-        wrapperClass: 'mb-16',
-        h2Class: 'mb-4 text-brand-dark'
+        title: 'Catálogo Interactivo',
+        subtitle: 'Interactúa con nuestras prendas en 360°, explora la paleta de colores y comprueba cada detalle.',
+        wrapperClass: 'mb-8 lg:mb-12 text-center',
+        h2Class: 'mb-2 text-black dark:text-white font-black tracking-tight text-3xl sm:text-4xl lg:text-5xl uppercase'
       });
     }
 
-    const cta = this.query('[data-cta-configurator]');
-    if (cta) {
-      cta.innerHTML = whatsappButton({
-        id: 'config-combo-btn',
-        text: 'Solicitar esta combinación',
-        iconClass: 'w-5 h-5',
-        target: '_blank',
-        classes: CTA_CLASES,
-        href: enlaceWhatsApp(this.colorInicial, this.logoInicial, COLORES, LOGOS)
-      });
+    this._renderizarColores();
+    renderIcons(this.root);
+  }
+
+  _renderizarColores() {
+    const contenedor = this.query('[data-catalog-colors]');
+    if (!contenedor) return;
+
+    contenedor.innerHTML = COLORES.map((c) => {
+      const isSelected = c.id === this.colorSeleccionado;
+      return `
+        <button type="button" data-color-id="${c.id}" data-color-hex="${c.hex}" data-color-label="${c.label}"
+          class="aspect-square rounded-2xl border flex flex-col items-center justify-center transition-all p-1 min-w-0 ${
+            isSelected
+              ? 'border-black dark:border-white ring-2 ring-black dark:ring-white scale-105 bg-black/5 dark:bg-white/10'
+              : 'border-neutral-200 dark:border-neutral-800 hover:border-black dark:hover:border-white bg-transparent'
+          }" title="${c.label}">
+          <span class="w-6 h-6 rounded-full border border-black/20 dark:border-white/30 shadow-xs flex items-center justify-center flex-shrink-0" style="background-color: ${c.hex}">
+            ${isSelected ? '<span class="w-1.5 h-1.5 rounded-full bg-white dark:bg-black"></span>' : ''}
+          </span>
+          <span class="text-[10px] font-bold text-black dark:text-white mt-1 truncate max-w-full leading-none">${c.label}</span>
+        </button>
+      `;
+    }).join('');
+
+    const colorActivoLabel = this.query('[data-color-active-name]');
+    const activeColorObj = COLORES.find((c) => c.id === this.colorSeleccionado);
+    if (colorActivoLabel && activeColorObj) {
+      colorActivoLabel.textContent = activeColorObj.label;
+    }
+
+    const caption = this.query('[data-config-caption]');
+    if (caption && activeColorObj) {
+      caption.textContent = activeColorObj.label;
     }
   }
 
   bindEvents() {
-    const colores = this.query('[data-config-colores]');
-    const logos = this.query('[data-config-logos]');
-    const caption = this.query('[data-config-caption]');
-    const btn = this.query('#config-combo-btn');
     const contenedor3D = this.query('[data-config-3d]');
-    const seccion = this.query('#colores');
+    const caption = this.query('[data-config-caption]');
+    const colorActivoLabel = this.query('[data-color-active-name]');
 
-    if (!colores || !logos || !caption || !btn || !contenedor3D || !seccion) return;
+    // Selector de Tipo de Prenda (Camiseta / Manga Siza)
+    const btnsPrenda = this.queryAll('[data-product-type-btn]');
+    btnsPrenda.forEach((btn) => {
+      this.on(btn, 'click', () => {
+        const tipoKey = btn.getAttribute('data-product-type-btn');
+        this.tipoPrenda = tipoKey;
 
-    renderColores(colores, this.colorInicial);
-    renderLogos(logos, this.logoInicial);
-    aplicarModoSeccion(seccion, this.colorInicial);
-    this._seleccion = { color: this.colorInicial, logo: this.logoInicial };
-
-    ['config-color', 'config-logo'].forEach((grupo) => {
-      $$(`input[name="${grupo}"]`, this.root).forEach((input) => {
-        this.on(input, 'change', () => {
-          const sel = seleccionActual(this.root);
-          caption.textContent = etiquetaCombinacion(sel.color, sel.logo, COLORES, LOGOS);
-          btn.href = enlaceWhatsApp(sel.color, sel.logo, COLORES, LOGOS);
-          store.set('seleccion', sel);
-          this._seleccion = sel;
-          if (grupo === 'config-color') aplicarModoSeccion(seccion, sel.color);
-          this._tres?.aplicarSeleccion(sel);
+        // Actualizar estados visuales de los botones
+        btnsPrenda.forEach((b) => {
+          const isActive = b.getAttribute('data-product-type-btn') === tipoKey;
+          if (isActive) {
+            b.className =
+              'py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all text-center flex items-center justify-center gap-1.5 bg-black text-white dark:bg-white dark:text-black shadow-sm';
+          } else {
+            b.className =
+              'py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all text-center flex items-center justify-center gap-1.5 text-black dark:text-white hover:bg-neutral-200 dark:hover:bg-neutral-700';
+          }
         });
+
+        // Cambiar modelo 3D
+        this._tres?.cambiarModelo(tipoKey);
       });
     });
 
-    this._iniciarCarga3D(contenedor3D);
+    // Delegación de eventos para la paleta de colores
+    const contenedorColores = this.query('[data-catalog-colors]');
+    if (contenedorColores) {
+      this.on(contenedorColores, 'click', (e) => {
+        const btn = e.target.closest('[data-color-id]');
+        if (!btn) return;
+
+        const colorId = btn.getAttribute('data-color-id');
+        const colorHex = btn.getAttribute('data-color-hex');
+        const colorLabel = btn.getAttribute('data-color-label');
+
+        this.colorSeleccionado = colorId;
+        this._seleccion = { color: colorId, logo: 'tambo' };
+        store.set('seleccion', this._seleccion);
+
+        if (caption) caption.textContent = colorLabel;
+        if (colorActivoLabel) colorActivoLabel.textContent = colorLabel;
+
+        // Aplicar al visor 3D
+        this._tres?.aplicarSeleccion({ color: colorHex, logo: 'tambo' });
+
+        // Actualizar visual de swatches
+        this._renderizarColores();
+      });
+    }
+
+    if (contenedor3D) {
+      this._iniciarCarga3D(contenedor3D);
+    }
   }
 
   /**
-   * Carga el visor 3D de forma diferida: three.js y el modelo GLB
-   * solo se descargan cuando la sección se acerca al viewport.
+   * Carga el visor 3D de forma diferida.
    * @param {HTMLElement} contenedor3D
    */
   _iniciarCarga3D(contenedor3D) {
@@ -151,7 +143,11 @@ export class Configurator extends Component {
       import('../../three/Configurator3D.js').then(({ Configurator3D }) => {
         if (this._destruido) return;
         this._tres = new Configurator3D(contenedor3D);
-        this._tres.aplicarSeleccion(this._seleccion);
+        const activeColorObj = COLORES.find((c) => c.id === this.colorSeleccionado);
+        this._tres.aplicarSeleccion({
+          color: activeColorObj ? activeColorObj.hex : '#111111',
+          logo: 'tambo'
+        });
         this._tres.montar();
       });
     };
@@ -177,12 +173,6 @@ export class Configurator extends Component {
     observador.observe(contenedor3D);
   }
 
-  /**
-   * Precarga el visor 3D en tiempo idle: descarga three.js y el GLB apenas
-   * la página termina de cargar, sin crear el renderer ni bloquear el primer
-   * paint. Cuando el usuario llega a la sección, el modelo ya está en caché
-   * y la vista previa aparece al instante.
-   */
   _precargar3D() {
     const enIdle = (cb) => {
       if ('requestIdleCallback' in window) requestIdleCallback(cb, { timeout: 3000 });

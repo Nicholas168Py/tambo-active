@@ -1,6 +1,93 @@
+# ========================================================
+# ARCHIVOS DE ENTORNO Y VARIABLES SECRETAS (CRÍTICO)
+# ========================================================
+.env
+.env.production
+.env.development
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# ========================================================
+# CLAVES, CERTIFICADOS Y CREDENCIALES
+# ========================================================
+*.pem
+*.key
+*.cer
+*.cert
+*.crt
+*.pfx
+*.p12
+id_rsa*
+*.id_rsa
+credentials.json
+serviceAccountKey.json
+secret.json
+*.private
+*.secret
+
+# ========================================================
+# DEPENDENCIAS Y PAQUETES
+# ========================================================
 node_modules/
+jspm_packages/
+web_modules/
+.pnpm-store/
+
+# ========================================================
+# COMPILACIÓN Y PRODUCCIÓN
+# ========================================================
 dist/
 dist-ssr/
-*.local
-.DS_Store
+build/
+*.tsbuildinfo
+
+# ========================================================
+# LOGS Y REGISTROS DE ERRORES
+# ========================================================
+logs/
+*.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ========================================================
+# CONFIGURACIÓN DE EDITORES Y HERRAMIENTAS
+# ========================================================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.bak
+
+# ========================================================
+# ARCHIVOS TEMPORALES Y CACHÉ
+# ========================================================
+.cache/
+.temp/
+.tmp/
+tmp/
+*.local
+.eslintcache
+.stylelintcache
+.parcel-cache
+
+# ========================================================
+# SISTEMA OPERATIVO
+# ========================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
