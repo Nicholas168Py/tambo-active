@@ -3,8 +3,11 @@
   <div class="grid grid-cols-1 lg:grid-cols-2 w-full min-h-[calc(100vh-5rem)] sm:min-h-[calc(100vh-6rem)] lg:min-h-[calc(100vh-7rem)] items-center">
     <!-- Left Column: Image with gradient overlay -->
     <div class="h-96 sm:h-[480px] lg:h-full min-h-[400px] relative overflow-hidden">
-      <img alt="Entrenando con Tambo Active" class="w-full h-full object-cover object-center" fetchpriority="high" decoding="async"
-        src="/Corredor.webp" />
+      <picture class="w-full h-full block">
+        <source srcset="./Corredor.webp" type="image/webp">
+        <img alt="Entrenando con Tambo Active" class="w-full h-full object-cover object-center" fetchpriority="high" decoding="async"
+          src="./Corredor.png" />
+      </picture>
       <div class="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/40 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-brand-black/40 lg:to-brand-black"></div>
     </div>
 

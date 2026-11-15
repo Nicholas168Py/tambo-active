@@ -152,8 +152,6 @@ export class Configurator extends Component {
       });
     };
 
-    this._precargar3D();
-
     if (!('IntersectionObserver' in window)) {
       cargar();
       return;

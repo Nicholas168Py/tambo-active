@@ -1,22 +1,37 @@
 # Configuración optimizada para InfinityFree / Apache
-ErrorDocument 404 /index.html
+<IfModule mod_mime.c>
+  AddType text/css .css
+  AddType application/javascript .js
+  AddType model/gltf-binary .glb
+  AddType application/manifest+json .webmanifest .json
+  AddType application/json .json
+  AddType image/svg+xml .svg
+  AddType image/webp .webp
+  AddType image/png .png
+  AddType image/jpeg .jpg .jpeg
+</IfModule>
 
-AddType text/css .css
-AddType application/javascript .js
-AddType model/gltf-binary .glb
-AddType application/manifest+json .webmanifest .json
-AddType application/json .json
-AddType image/svg+xml .svg
-AddType image/webp .webp
-AddType image/png .png
-AddType image/jpeg .jpg .jpeg
+<IfModule mod_headers.c>
+  <FilesMatch "\.(glb|webp|png|jpe?g|svg|ico)$">
+    Header set Access-Control-Allow-Origin "*"
+    Header set Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
+  </FilesMatch>
+</IfModule>
 
 # Enrutamiento para SPA (Single Page Application)
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
+  
+  # Si el archivo o directorio existe físicamente, servirlo directamente
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Excluir recursos estáticos de reescritura a index.html
+  RewriteCond %{REQUEST_URI} \.(css|js|glb|webp|png|jpe?g|gif|svg|ico|webmanifest|json|woff2?|ttf|eot)$ [NC]
+  RewriteRule ^ - [L]
+
+  # Todo lo demás se enruta a index.html
+  RewriteRule ^ index.html [L]
 </IfModule>
