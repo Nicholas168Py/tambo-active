@@ -11,7 +11,7 @@ export const COMBOS_DATA = [
     precio: 39900,
     precioOriginal: 50000,
     ahorro: '',
-    imagen: '/hero/camisa-hero.png',
+    imagen: './hero/camisa-hero.png',
     descripcionRegla: 'Escoge 1 color y 1 talla a tu elección.',
     beneficios: [
       '1 Camiseta deportiva premium',
@@ -28,7 +28,7 @@ export const COMBOS_DATA = [
     precio: 69900,
     precioOriginal: 100000,
     ahorro: 'Ahorra 30%',
-    imagen: '/camisetas/combo_2/1.webp',
+    imagen: './camisetas/combo_2/1.webp',
     descripcionRegla: 'Escoge hasta 2 colores y distribuye 2 tallas libremente.',
     beneficios: [
       '2 Camisetas deportivas premium',
@@ -45,7 +45,7 @@ export const COMBOS_DATA = [
     precio: 99900,
     precioOriginal: 150000,
     ahorro: 'Ahorra 33%',
-    imagen: '/camisetas/combo_3/1.webp',
+    imagen: './camisetas/combo_3/1.webp',
     descripcionRegla: 'Escoge hasta 3 colores y distribuye 3 tallas a tu medida.',
     beneficios: [
       '3 Camisetas deportivas premium',
@@ -62,7 +62,7 @@ export const COMBOS_DATA = [
     precio: 179900,
     precioOriginal: 300000,
     ahorro: 'Ahorra 40%',
-    imagen: '/camisetas/6-camisetas.webp?v=2',
+    imagen: './camisetas/6-camisetas.webp?v=2',
     descripcionRegla: 'Incluye automáticamente los 6 colores oficiales. Distribuye hasta 6 tallas.',
     beneficios: [
       'Todos los 6 colores incluidos de fábrica',

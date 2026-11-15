@@ -2,33 +2,33 @@ import { Component } from '../../core/Component.js';
 
 // Array de rutas de imágenes disponibles en la carpeta combo_2 (públicas)
 const COMBO_2_IMAGES = [
-  '/camisetas/combo_2/1.webp',
-  '/camisetas/combo_2/2.webp',
-  '/camisetas/combo_2/3.webp',
-  '/camisetas/combo_2/4.webp',
-  '/camisetas/combo_2/5.webp',
-  '/camisetas/combo_2/6.webp',
-  '/camisetas/combo_2/7.webp',
-  '/camisetas/combo_2/8.webp',
-  '/camisetas/combo_2/9.webp',
-  '/camisetas/combo_2/10.webp',
-  '/camisetas/combo_2/11.webp',
-  '/camisetas/combo_2/12.webp',
-  '/camisetas/combo_2/13.webp',
-  '/camisetas/combo_2/14.webp',
-  '/camisetas/combo_2/15.webp',
-  '/camisetas/combo_2/16.webp',
-  '/camisetas/combo_2/17.webp',
-  '/camisetas/combo_2/18.webp',
-  '/camisetas/combo_2/19.webp',
-  '/camisetas/combo_2/20.webp',
-  '/camisetas/combo_2/21.webp',
+  './camisetas/combo_2/1.webp',
+  './camisetas/combo_2/2.webp',
+  './camisetas/combo_2/3.webp',
+  './camisetas/combo_2/4.webp',
+  './camisetas/combo_2/5.webp',
+  './camisetas/combo_2/6.webp',
+  './camisetas/combo_2/7.webp',
+  './camisetas/combo_2/8.webp',
+  './camisetas/combo_2/9.webp',
+  './camisetas/combo_2/10.webp',
+  './camisetas/combo_2/11.webp',
+  './camisetas/combo_2/12.webp',
+  './camisetas/combo_2/13.webp',
+  './camisetas/combo_2/14.webp',
+  './camisetas/combo_2/15.webp',
+  './camisetas/combo_2/16.webp',
+  './camisetas/combo_2/17.webp',
+  './camisetas/combo_2/18.webp',
+  './camisetas/combo_2/19.webp',
+  './camisetas/combo_2/20.webp',
+  './camisetas/combo_2/21.webp',
 ];
 
 // Array de rutas de imágenes disponibles en la carpeta combo_3 (públicas)
 const COMBO_3_IMAGES = [
-  '/camisetas/combo_3/1.webp',
-  '/camisetas/combo_3/2.webp',
+  './camisetas/combo_3/1.webp',
+  './camisetas/combo_3/2.webp',
 ];
 import { COMBOS_DATA } from './combosData.js';
 import { ComboModal } from './ComboModal.js';
@@ -85,7 +85,7 @@ export class Combos extends Component {
         <div class="flex-1 flex flex-col">
           <!-- Imagen Optimizada (Vertical en celular, altura controlada en escritorio) -->
           <div class="relative w-full aspect-[4/3.5] sm:aspect-auto h-auto sm:h-36 lg:h-38 xl:h-[13rem] xl:h-40 rounded-xl sm:rounded-2xl bg-white !bg-white border border-neutral-200 dark:border-neutral-800 flex items-center justify-center p-2 mb-2 overflow-hidden shrink-0">
-            <img src="${imgSrc}" alt="${combo.titulo}" data-combo-card-img="${combo.id}" class="w-full h-full max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-200 block" loading="eager" decoding="async" fetchpriority="high" width="400" height="350" />
+            <img src="${imgSrc}" alt="${combo.titulo}" data-combo-card-img="${combo.id}" class="w-full h-full max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-200 block" loading="lazy" decoding="async" width="400" height="350" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this;setTimeout(function(){s.src=s.src.split('?')[0]+'?v='+Date.now();},350);}" />
           </div>
 
           <!-- Título y Precios -->
@@ -148,7 +148,7 @@ export class Combos extends Component {
           
           <!-- Imagen izquierda (Thumbnail) -->
           <div class="w-28 h-28 min-w-[112px] rounded-xl bg-white !bg-white border border-neutral-200 dark:border-neutral-800 p-1.5 flex items-center justify-center shrink-0 overflow-hidden relative">
-            <img src="${imgSrc}" alt="${combo.titulo}" data-combo-card-img="${combo.id}" class="w-full h-full max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-200 block" loading="eager" decoding="async" width="112" height="112" />
+            <img src="${imgSrc}" alt="${combo.titulo}" data-combo-card-img="${combo.id}" class="w-full h-full max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-200 block" loading="lazy" decoding="async" width="112" height="112" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this;setTimeout(function(){s.src=s.src.split('?')[0]+'?v='+Date.now();},350);}" />
           </div>
 
           <!-- Información derecha -->

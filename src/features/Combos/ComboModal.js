@@ -322,7 +322,7 @@ export class ComboModal {
 
               <!-- Preview de Imagen Dinámico Centrado (Optimizado Safari: min-h, shrink-0, object-contain) -->
               <div class="relative w-full aspect-[16/10] sm:aspect-square bg-white rounded-2xl shadow-xs border border-neutral-100 p-2 sm:p-4 flex flex-col items-center justify-center overflow-hidden my-3 sm:my-5 group min-h-[190px] sm:min-h-[240px] shrink-0">
-                <img src="${currentPreviewImg}" alt="${this.combo.titulo}" class="w-full h-full max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105 block mx-auto" data-preview-img loading="eager" decoding="async" fetchpriority="high" width="400" height="400" />
+                <img src="${currentPreviewImg}" alt="${this.combo.titulo}" class="w-full h-full max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105 block mx-auto" data-preview-img loading="eager" decoding="async" width="400" height="400" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this;setTimeout(function(){s.src=s.src.split('?')[0]+'?v='+Date.now();},350);}" />
                 
                 <!-- Píldora de estado de la prenda activa o combinación de colores debajo de la camiseta centrada -->
                 <div class="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 flex items-center justify-center bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-xs font-medium shadow-sm" data-modal-preview-pill>

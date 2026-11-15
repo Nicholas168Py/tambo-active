@@ -64,6 +64,6 @@ export function obtenerCombinacionDuo(color1Id, color2Id) {
 
   return {
     numero,
-    ruta: `/camisetas/combo_2/${numero}.webp`
+    ruta: `./camisetas/combo_2/${numero}.webp`
   };
 }

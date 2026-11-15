@@ -105,8 +105,42 @@
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" />
   </noscript>
 
+  <!-- Auto-recuperación de imágenes en primera carga (Safari / InfinityFree / WebP) -->
+  <script>
+    (function () {
+      window.addEventListener(
+        'error',
+        function (e) {
+          var target = e.target;
+          if (target && target.tagName === 'IMG') {
+            var retries = parseInt(target.getAttribute('data-img-retries') || '0', 10);
+            if (retries < 3) {
+              target.setAttribute('data-img-retries', retries + 1);
+              var delay = 350 * (retries + 1);
+              setTimeout(function () {
+                var src = target.getAttribute('src') || target.src;
+                if (!src) return;
+                var cleanSrc = src.split('?')[0];
+
+                // Si es la imagen Corredor.webp y falló en Safari, intentar fallback a Corredor.png
+                if (cleanSrc.indexOf('Corredor.webp') !== -1 && retries >= 1) {
+                  target.src = cleanSrc.replace('Corredor.webp', 'Corredor.png') + '?v=' + Date.now();
+                  return;
+                }
+
+                var sep = cleanSrc.indexOf('?') === -1 ? '?' : '&';
+                target.src = cleanSrc + sep + '_rt=' + Date.now();
+              }, delay);
+            }
+          }
+        },
+        true // Fase de captura para interceptar errores de carga de imágenes
+      );
+    })();
+  </script>
+
   <!-- Preload de la imagen principal del Hero -->
-  <link rel="preload" as="image" href="/Corredor.webp" type="image/webp" fetchpriority="high" />
+  <link rel="preload" as="image" href="./Corredor.webp" type="image/webp" fetchpriority="high" />
 
   <script type="module" src="/src/main.js"></script>
 </head>
