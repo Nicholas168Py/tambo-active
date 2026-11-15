@@ -29,3 +29,10 @@
   }
 }
 
+@media (min-width: 1280px) {
+  .xl\:h-40 {
+    height: 13rem !important;
+  }
+}
+
+

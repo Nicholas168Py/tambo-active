@@ -16,6 +16,7 @@ export const COLORES_DISPONIBLES = [
 
 /**
  * Genera el HTML de los colores seleccionados para colocarlos debajo de la camiseta en el card.
+ * Optimizado para ser compacto: se elimina el texto "Personaliza tus colores" y se compacta el espaciado.
  */
 export function renderComboCardColors(combo, slots) {
   if (combo.unidades === 6) {
@@ -23,7 +24,7 @@ export function renderComboCardColors(combo, slots) {
       (c) => `<span class="w-3.5 h-3.5 rounded-full border border-white dark:border-neutral-900 shadow-2xs flex-shrink-0" style="background-color: ${c.hex}" title="${c.label}"></span>`
     ).join('');
     return `
-      <div class="inline-flex items-center gap-2 py-1 px-3 rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 max-w-full">
+      <div class="inline-flex items-center gap-1.5 py-0.5 px-2.5 rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 max-w-full">
         <div class="flex items-center -space-x-1 flex-shrink-0">${swatches}</div>
         <span class="text-xs font-semibold text-neutral-800 dark:text-neutral-200 truncate">6 colores incluidos</span>
       </div>
@@ -52,20 +53,29 @@ export function renderComboCardColors(combo, slots) {
     .join('');
 
   const anySelected = slotItems.some((s) => s.colorSeleccionado === true);
-  const labels = anySelected
-    ? colorObjs
-        .map((c, i) => {
-          const slot = slotItems[i];
-          if (slot && slot.colorSeleccionado === false) {
-            return 'Pendiente';
-          }
-          return c.label;
-        })
-        .join(combo.unidades === 2 ? ' + ' : ', ')
-    : 'Personaliza tus colores';
+  
+  // Requerimiento 6: Si aún no hay colores seleccionados, no mostrar badge "Personaliza tus colores"
+  if (!anySelected) {
+    return `
+      <div class="inline-flex items-center gap-1.5 py-0.5 px-2 rounded-full bg-neutral-100/80 dark:bg-neutral-800/80 border border-neutral-200/60 dark:border-neutral-700/60">
+        <div class="flex items-center -space-x-1 flex-shrink-0">${swatches}</div>
+        <span class="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">Elige colores</span>
+      </div>
+    `;
+  }
+
+  const labels = colorObjs
+    .map((c, i) => {
+      const slot = slotItems[i];
+      if (slot && slot.colorSeleccionado === false) {
+        return 'Pendiente';
+      }
+      return c.label;
+    })
+    .join(combo.unidades === 2 ? ' + ' : ', ');
 
   return `
-    <div class="inline-flex items-center gap-2 py-1 px-3 rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 max-w-full">
+    <div class="inline-flex items-center gap-1.5 py-0.5 px-2.5 rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 max-w-full">
       <div class="flex items-center -space-x-1 flex-shrink-0">${swatches}</div>
       <span class="text-xs font-semibold text-neutral-800 dark:text-neutral-200 truncate">${labels}</span>
     </div>
@@ -212,9 +222,9 @@ export class ComboModal {
 
   render() {
     const modal = document.createElement('div');
-    // Overlay centrado con padding y overscroll bloqueado
+    // Overlay base: En desktop centra con backdrop blur; en mobile cubre la pantalla completa
     modal.className =
-      'fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-6 overscroll-contain transition-opacity duration-300';
+      'fixed inset-0 bg-black/60 md:backdrop-blur-sm z-50 flex items-center justify-center md:p-6 overscroll-contain transition-opacity duration-300';
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
     modal.setAttribute('aria-label', `Configurar ${this.combo.titulo}`);
@@ -229,125 +239,168 @@ export class ComboModal {
       comboDuoInfo = obtenerCombinacionDuo(this.slots[0].color, this.slots[1].color);
       currentPreviewImg = comboDuoInfo.ruta;
       this.combo.imagen = comboDuoInfo.ruta;
-      const cardImg = document.querySelector(`[data-combo-card-img="${this.combo.id}"]`);
-      if (cardImg) {
-        cardImg.src = comboDuoInfo.ruta;
-      }
+      document.querySelectorAll(`[data-combo-card-img="${this.combo.id}"]`).forEach((img) => {
+        img.src = comboDuoInfo.ruta;
+      });
     }
 
     modal.innerHTML = `
-      <div class="bg-white rounded-3xl max-w-4xl w-full shadow-2xl overflow-hidden relative border border-neutral-100 max-h-[90vh] flex flex-col md:flex-row transition-all duration-300 my-auto">
+      <!-- Panel Principal: En mobile slide-over full viewport (100vw, 100dvh) desde la derecha estilo Temu; en desktop modal centrado -->
+      <div data-modal-panel
+        class="fixed inset-0 md:relative w-full h-[100dvh] md:h-auto md:max-h-[90vh] md:max-w-4xl bg-white md:rounded-3xl shadow-none md:shadow-2xl overflow-hidden flex flex-col md:flex-row transform-gpu translate-x-full md:translate-x-0 transition-transform duration-250 ease-out will-change-transform md:my-auto md:border md:border-neutral-100 z-50">
         
-        <!-- Botón de Cierre con margen superior dedicado -->
+        <!-- ========================================================
+            HEADER MOBILE (Estilo Temu - Visible solo en < md)
+           ======================================================== -->
+        <header class="flex md:hidden items-center justify-between px-3.5 py-3 bg-white border-b border-neutral-200 sticky top-0 z-40 shrink-0">
+          <button type="button" data-modal-back aria-label="Volver atrás"
+            class="w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-800 hover:text-black flex items-center justify-center transition-transform active:scale-95 shadow-xs shrink-0">
+            <svg class="w-5 h-5 stroke-neutral-900" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+
+          <div class="flex-1 text-center px-2 min-w-0">
+            <h1 class="text-base sm:text-lg font-black uppercase tracking-tight text-neutral-950 truncate">
+              ${this.combo.titulo}
+            </h1>
+          </div>
+
+          <button type="button" data-modal-close aria-label="Cerrar ventana"
+            class="w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-800 hover:text-black flex items-center justify-center transition-transform active:scale-95 shadow-xs shrink-0">
+            <svg class="w-5 h-5 stroke-neutral-900" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </header>
+
+        <!-- Botón de Cierre DESKTOP (Flotante en esquina superior derecha) -->
         <button type="button" data-modal-close aria-label="Cerrar ventana"
-          class="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-30 p-2.5 text-neutral-400 hover:text-neutral-900 rounded-full hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white/80 backdrop-blur-xs shadow-xs">
-          <svg class="w-5 h-5 stroke-neutral-700 hover:stroke-neutral-950" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
+          class="hidden md:flex absolute top-4 right-4 z-30 w-11 h-11 items-center justify-center text-neutral-600 hover:text-black rounded-full bg-white hover:bg-neutral-100 border border-neutral-200 shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-neutral-900 active:scale-95">
+          <svg class="w-5 h-5 stroke-neutral-900" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
         <!-- ========================================================
-            COLUMNA IZQUIERDA (~42%): Visual, Precios y Confianza
+            CUERPO SCROLLABLE (Unificado en mobile, 2 columnas en desktop)
            ======================================================== -->
-        <div class="w-full md:w-[42%] bg-neutral-50 p-4 sm:p-6 md:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-neutral-200">
-          <div>
-            <!-- Badge Cápsula -->
-            <div class="mb-2 sm:mb-3">
-              <span class="inline-flex items-center text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-neutral-200 text-neutral-800 border border-neutral-300">
-                ${this.combo.badge}
-              </span>
-            </div>
+        <div class="flex-1 overflow-y-auto overscroll-contain flex flex-col md:flex-row md:overflow-hidden" data-lenis-prevent>
 
-            <!-- Título y Subtítulo -->
-            <h2 class="text-xl sm:text-2xl font-black text-neutral-900 tracking-tight uppercase leading-tight">
-              ${this.combo.titulo}
-            </h2>
-            <p class="text-xs sm:text-sm text-neutral-500 mt-0.5">
-              ${this.combo.subtitulo} • ${this.combo.unidades} ${this.combo.unidades === 1 ? 'unidad' : 'unidades'}
-            </p>
+          <!-- COLUMNA IZQUIERDA (~42%): Visual, Precios y Confianza (Centrado en mobile) -->
+          <div class="w-full md:w-[42%] bg-neutral-50 p-4 sm:p-6 md:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-neutral-200 shrink-0 items-center md:items-start text-center md:text-left">
+            <div class="w-full flex flex-col items-center md:items-start">
+              <!-- Badge Cápsula -->
+              <div class="mb-2 sm:mb-3 flex justify-center md:justify-start w-full">
+                <span class="inline-flex items-center text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-neutral-200 text-neutral-800 border border-neutral-300 shadow-2xs">
+                  ${this.combo.badge}
+                </span>
+              </div>
 
-            <!-- Fila de Precios -->
-            <div class="mt-2.5 sm:mt-4 flex items-center flex-wrap gap-2 sm:gap-2.5">
-              <span class="text-xl sm:text-2xl font-extrabold text-neutral-900 tracking-tight">
-                ${formatearCOP(this.combo.precio)}
-              </span>
-              <span class="text-xs sm:text-sm text-neutral-400 line-through font-medium">
-                ${formatearCOP(this.combo.precioOriginal)}
-              </span>
-              ${
-                this.combo.ahorro
-                  ? `<span class="bg-emerald-100 text-emerald-800 text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-0.5 rounded-full">${this.combo.ahorro}</span>`
-                  : ''
-              }
-            </div>
+              <!-- Título y Subtítulo -->
+              <h2 class="text-xl sm:text-2xl font-black text-neutral-900 tracking-tight uppercase leading-tight w-full">
+                ${this.combo.titulo}
+              </h2>
+              <p class="text-xs sm:text-sm text-neutral-500 mt-0.5 w-full">
+                ${this.combo.subtitulo} • ${this.combo.unidades} ${this.combo.unidades === 1 ? 'unidad' : 'unidades'}
+              </p>
 
-            <!-- Preview de Imagen Dinámico (Optimizado para móviles) -->
-            <div class="aspect-[16/10] sm:aspect-square bg-white rounded-2xl shadow-xs border border-neutral-100 p-2 sm:p-4 flex flex-col items-center justify-center relative overflow-hidden my-3 sm:my-5 group max-h-[190px] sm:max-h-none">
-              <img src="${currentPreviewImg}" alt="${this.combo.titulo}" class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" data-preview-img loading="eager" decoding="async" fetchpriority="high" width="400" height="400" />
-              
-              <!-- Píldora de estado de la prenda activa o combinación de colores debajo de la camiseta -->
-              <div class="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 flex items-center justify-between bg-black/75 backdrop-blur-md px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-white text-[11px] sm:text-xs font-medium shadow-sm" data-modal-preview-pill>
-                ${this._renderModalPillContent()}
+              <!-- Fila de Precios Centrada -->
+              <div class="mt-2.5 sm:mt-4 flex items-center justify-center md:justify-start flex-wrap gap-2.5 w-full">
+                <span class="text-2xl sm:text-3xl font-extrabold text-red-600 tracking-tight">
+                  ${formatearCOP(this.combo.precio)}
+                </span>
+                <span class="text-sm sm:text-base text-neutral-400 line-through font-semibold">
+                  ${formatearCOP(this.combo.precioOriginal)}
+                </span>
+                ${
+                  this.combo.ahorro
+                    ? `<span class="bg-emerald-100 text-emerald-800 text-[11px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full shadow-2xs">${this.combo.ahorro}</span>`
+                    : ''
+                }
+              </div>
+
+              <!-- Preview de Imagen Dinámico Centrado (Optimizado Safari: min-h, shrink-0, object-contain) -->
+              <div class="relative w-full aspect-[16/10] sm:aspect-square bg-white rounded-2xl shadow-xs border border-neutral-100 p-2 sm:p-4 flex flex-col items-center justify-center overflow-hidden my-3 sm:my-5 group min-h-[190px] sm:min-h-[240px] shrink-0">
+                <img src="${currentPreviewImg}" alt="${this.combo.titulo}" class="w-full h-full max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105 block mx-auto" data-preview-img loading="eager" decoding="async" fetchpriority="high" width="400" height="400" />
+                
+                <!-- Píldora de estado de la prenda activa o combinación de colores debajo de la camiseta centrada -->
+                <div class="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 flex items-center justify-center bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-xs font-medium shadow-sm" data-modal-preview-pill>
+                  ${this._renderModalPillContent()}
+                </div>
               </div>
             </div>
+
+            <!-- Micro-copy de Confianza Centrado -->
+            <div class="pt-2 border-t border-neutral-200/80 hidden sm:flex items-center justify-center md:justify-start gap-2.5 text-xs text-neutral-600 leading-relaxed w-full">
+              <i data-lucide="rotate-ccw" class="w-4 h-4 text-neutral-800 flex-shrink-0 mt-0.5"></i>
+              <span>Cambios de talla y devoluciones gratis en tu primera compra.</span>
+            </div>
           </div>
 
-          <!-- Micro-copy de Confianza -->
-          <div class="pt-2 border-t border-neutral-200/80 hidden sm:flex items-start gap-2.5 text-xs text-neutral-600 leading-relaxed">
-            <i data-lucide="rotate-ccw" class="w-4 h-4 text-neutral-800 flex-shrink-0 mt-0.5"></i>
-            <span>Cambios de talla y devoluciones gratis en tu primera compra.</span>
+          <!-- COLUMNA DERECHA (~58%): Selectores y Configuración -->
+          <div class="w-full md:w-[58%] p-4 sm:p-6 md:p-8 md:pt-14 flex-1 flex flex-col justify-between md:overflow-y-auto space-y-4 sm:space-y-6">
+            
+            <!-- Contenedor de configuración -->
+            <div class="space-y-4 sm:space-y-5" data-slots-container>
+              ${this.esCombo6 ? this._renderCombo6Content() : this._renderSlots()}
+            </div>
+
+            <!-- Enlace Auxiliar: Guía de Tallas -->
+            <div class="pt-2 flex items-center justify-end">
+              <button type="button" data-toggle-size-guide
+                class="inline-flex items-center gap-1.5 text-xs sm:text-sm text-neutral-600 hover:text-neutral-900 underline font-semibold transition-colors">
+                <i data-lucide="ruler" class="w-4 h-4"></i>
+                <span>Guía de tallas y medidas</span>
+              </button>
+            </div>
+
+            <!-- Tabla desplegable de Guía de Tallas -->
+            <div data-size-guide-panel class="hidden p-3.5 bg-neutral-50 border border-neutral-200 rounded-2xl text-xs text-neutral-700 space-y-2.5">
+              <div class="font-bold text-neutral-900 flex justify-between items-center text-sm">
+                <span>Medidas en cm (Pecho / Largo)</span>
+                <button type="button" data-close-size-guide class="text-neutral-400 hover:text-neutral-900 text-base font-bold">×</button>
+              </div>
+              <div class="grid grid-cols-6 gap-1 text-center font-mono text-xs">
+                <div class="p-1 rounded bg-white border border-neutral-200"><span class="font-bold block text-neutral-900">XS</span>50/68</div>
+                <div class="p-1 rounded bg-white border border-neutral-200"><span class="font-bold block text-neutral-900">S</span>52/70</div>
+                <div class="p-1 rounded bg-white border border-neutral-200"><span class="font-bold block text-neutral-900">M</span>55/72</div>
+                <div class="p-1 rounded bg-white border border-neutral-200"><span class="font-bold block text-neutral-900">L</span>58/74</div>
+                <div class="p-1 rounded bg-white border border-neutral-200"><span class="font-bold block text-neutral-900">XL</span>61/76</div>
+                <div class="p-1 rounded bg-white border border-neutral-200"><span class="font-bold block text-neutral-900">XXL</span>64/78</div>
+              </div>
+            </div>
+
+            <!-- Footer de Acción en Desktop (visible sólo en md:) -->
+            <div class="hidden md:block pt-4 border-t border-neutral-100">
+              <button type="button" data-modal-submit ${!this.esValido ? 'disabled' : ''}
+                class="w-full py-4 rounded-2xl font-bold transition-all duration-200 flex items-center justify-center gap-2 text-sm uppercase tracking-wider ${
+                  this.esValido
+                    ? 'bg-neutral-900 hover:bg-black text-white shadow-lg shadow-neutral-900/10 cursor-pointer active:scale-[0.99]'
+                    : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+                }">
+                <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                <span data-cta-text>${this.ctaTexto}</span>
+              </button>
+            </div>
+
           </div>
+
         </div>
 
         <!-- ========================================================
-            COLUMNA DERECHA (~58%): Área con Scroll Interno Exclusivo
-            - pt-10 sm:pt-12 md:pt-14: Margen superior libre para la 'X' de cerrar
+            FOOTER STICKY MOBILE (Requerimiento 2: Fijo abajo para el pulgar)
            ======================================================== -->
-        <div class="w-full md:w-[58%] p-4 sm:p-6 md:p-8 pt-10 sm:pt-12 md:pt-14 flex-1 flex flex-col justify-between overflow-y-auto max-h-[calc(90vh-1rem)] space-y-4 sm:space-y-6" data-lenis-prevent>
-          
-          <!-- Contenedor de configuración -->
-          <div class="space-y-3 sm:space-y-4" data-slots-container>
-            ${this.esCombo6 ? this._renderCombo6Content() : this._renderSlots()}
-          </div>
-
-          <!-- Enlace Auxiliar: Guía de Tallas -->
-          <div class="pt-1 flex items-center justify-end">
-            <button type="button" data-toggle-size-guide
-              class="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-900 underline font-medium transition-colors">
-              <i data-lucide="ruler" class="w-3.5 h-3.5"></i>
-              <span>Guía de tallas y medidas</span>
-            </button>
-          </div>
-
-          <!-- Tabla desplegable de Guía de Tallas -->
-          <div data-size-guide-panel class="hidden p-3 bg-neutral-50 border border-neutral-200 rounded-2xl text-xs text-neutral-700 space-y-2">
-            <div class="font-bold text-neutral-900 flex justify-between items-center">
-              <span>Medidas en cm (Pecho / Largo)</span>
-              <button type="button" data-close-size-guide class="text-neutral-400 hover:text-neutral-900">×</button>
-            </div>
-            <div class="grid grid-cols-6 gap-1 text-center font-mono text-[11px]">
-              <div><span class="font-bold block">XS</span>50/68</div>
-              <div><span class="font-bold block">S</span>52/70</div>
-              <div><span class="font-bold block">M</span>55/72</div>
-              <div><span class="font-bold block">L</span>58/74</div>
-              <div><span class="font-bold block">XL</span>61/76</div>
-              <div><span class="font-bold block">XXL</span>64/78</div>
-            </div>
-          </div>
-
-          <!-- Footer de Acción (CTA Principal) -->
-          <div class="pt-4 border-t border-neutral-100">
-            <button type="button" data-modal-submit ${!this.esValido ? 'disabled' : ''}
-              class="w-full py-4 rounded-2xl font-bold transition-all duration-200 flex items-center justify-center gap-2 text-sm uppercase tracking-wider ${
-                this.esValido
-                  ? 'bg-neutral-900 hover:bg-black text-white shadow-lg shadow-neutral-900/10 cursor-pointer active:scale-[0.99]'
-                  : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
-              }">
-              <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-              <span data-cta-text>${this.ctaTexto}</span>
-            </button>
-          </div>
-
+        <div class="md:hidden sticky bottom-0 left-0 right-0 p-3.5 bg-white border-t border-neutral-200 z-30 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] pb-[max(0.875rem,env(safe-area-inset-bottom))] shrink-0">
+          <button type="button" data-modal-submit ${!this.esValido ? 'disabled' : ''}
+            class="w-full py-4 rounded-2xl font-bold transition-all duration-200 flex items-center justify-center gap-2 text-sm uppercase tracking-wider ${
+              this.esValido
+                ? 'bg-neutral-900 hover:bg-black text-white shadow-lg shadow-neutral-900/15 active:scale-[0.98]'
+                : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+            }">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+            <span data-cta-text>${this.ctaTexto}</span>
+          </button>
         </div>
 
       </div>
@@ -362,51 +415,51 @@ export class ComboModal {
   /**
    * Renderizado Simplificado para Combo de 6 Unidades (Colección Completa):
    * Quita la configuración repetitiva por camiseta y presenta los 6 colores incluidos
-   * junto con selector de tallas rápido y flexible.
+   * junto con selector de tallas rápido y flexible con áreas táctiles cómodas (>= 44px).
    */
   _renderCombo6Content() {
     return `
       <div class="space-y-4">
         <!-- Banner Informativo Colección Completa -->
         <div class="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-3">
-          <div class="flex items-center gap-2 font-bold text-neutral-900 text-sm">
-            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+          <div class="flex items-center gap-2 font-bold text-neutral-900 text-base">
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
             <span>Colección Completa Oficial (6 Colores)</span>
           </div>
-          <p class="text-xs text-neutral-600 leading-relaxed">
+          <p class="text-sm text-neutral-600 leading-relaxed">
             Este pack incluye automáticamente <strong>1 camiseta de cada uno de los 6 colores disponibles</strong>.
           </p>
 
-          <!-- Swatches de los 6 colores incluidos -->
-          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-1">
+          <!-- Swatches de los 6 colores incluidos con min 44x44px -->
+          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5 pt-1">
             ${COLORES_DISPONIBLES.map((c, i) => `
-              <div class="flex flex-col items-center gap-1 p-1.5 rounded-xl bg-white border border-neutral-200 text-center cursor-pointer hover:border-neutral-400 transition-all ${
-                this.focusedSlotIndex === i ? 'ring-2 ring-neutral-900' : ''
+              <div class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-white border border-neutral-200 text-center cursor-pointer hover:border-neutral-400 transition-all min-h-[64px] justify-center ${
+                this.focusedSlotIndex === i ? 'ring-2 ring-neutral-900 shadow-sm' : ''
               }" data-combo6-color-focus="${i}">
-                <span class="w-6 h-6 rounded-full border border-neutral-300 shadow-xs flex-shrink-0" style="background-color: ${c.hex}"></span>
-                <span class="text-[10px] font-bold text-neutral-800 truncate w-full">${c.label}</span>
+                <span class="w-8 h-8 rounded-full border border-neutral-300 shadow-xs flex-shrink-0" style="background-color: ${c.hex}"></span>
+                <span class="text-xs font-bold text-neutral-800 truncate w-full">${c.label}</span>
               </div>
             `).join('')}
           </div>
         </div>
 
         <!-- Opción Rápida: Misma Talla para Todas -->
-        <div class="p-4 rounded-2xl border border-neutral-200 bg-white space-y-2.5">
+        <div class="p-4 rounded-2xl border border-neutral-200 bg-white space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold uppercase tracking-wider text-neutral-800">
+            <span class="text-base font-bold text-neutral-900">
               Aplicar misma talla a las 6 camisetas:
             </span>
-            <span class="text-xs text-neutral-500 font-semibold" data-combo6-global-label>
+            <span class="text-base text-neutral-900 font-extrabold" data-combo6-global-label>
               Talla: ${this.combo6TallaGlobal}
             </span>
           </div>
           <div class="grid grid-cols-6 gap-2">
             ${TALLAS_DISPONIBLES.map((t) => `
               <button type="button" data-combo6-global-size="${t}"
-                class="py-2 text-xs font-bold rounded-xl text-center transition-all ${
+                class="min-h-[44px] py-2.5 text-base font-bold rounded-xl text-center transition-all flex items-center justify-center ${
                   t === this.combo6TallaGlobal
                     ? 'bg-neutral-900 text-white border-2 border-neutral-900 shadow-sm'
-                    : 'bg-white text-neutral-700 border border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50'
+                    : 'bg-white text-neutral-700 border border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50 active:scale-95'
                 }">
                 ${t}
               </button>
@@ -415,26 +468,26 @@ export class ComboModal {
         </div>
 
         <!-- Distribución Detallada por Color (Compacta) -->
-        <div class="p-3.5 rounded-2xl border border-neutral-200 bg-neutral-50 space-y-2">
-          <span class="text-xs font-bold text-neutral-700 block mb-1">
+        <div class="p-4 rounded-2xl border border-neutral-200 bg-neutral-50 space-y-2.5">
+          <span class="text-base font-bold text-neutral-900 block mb-1">
             O personaliza la talla de cada color:
           </span>
-          <div class="space-y-1.5">
+          <div class="space-y-2">
             ${this.slots.map((slot, idx) => {
               const colorObj = COLORES_DISPONIBLES.find((c) => c.id === slot.color) || COLORES_DISPONIBLES[idx];
               return `
-                <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-white border border-neutral-200 text-xs">
-                  <div class="flex items-center gap-2 min-w-0">
-                    <span class="w-4 h-4 rounded-full border border-neutral-300 flex-shrink-0" style="background-color: ${colorObj.hex}"></span>
-                    <span class="font-bold text-neutral-800 truncate">${colorObj.label}</span>
+                <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white border border-neutral-200 text-sm">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="w-6 h-6 rounded-full border border-neutral-300 flex-shrink-0" style="background-color: ${colorObj.hex}"></span>
+                    <span class="font-bold text-neutral-900 text-sm truncate">${colorObj.label}</span>
                   </div>
-                  <div class="flex items-center gap-1">
+                  <div class="flex items-center gap-1.5">
                     ${TALLAS_DISPONIBLES.map((t) => `
                       <button type="button" data-slot-size-btn="${t}" data-slot-idx="${idx}"
-                        class="w-7 h-7 text-[11px] font-semibold rounded-lg text-center transition-all flex items-center justify-center ${
+                        class="min-h-[40px] min-w-[36px] sm:min-w-[40px] text-xs sm:text-sm font-bold rounded-lg text-center transition-all flex items-center justify-center ${
                           slot.size === t
-                            ? 'bg-neutral-900 text-white font-bold'
-                            : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                            ? 'bg-neutral-900 text-white font-bold shadow-xs'
+                            : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 active:scale-95'
                         }">
                         ${t}
                       </button>
@@ -452,9 +505,10 @@ export class ComboModal {
   /**
    * Renderizado de Slots para Combos:
    * Diseñado con sistema de acordeón intuitivo para móviles y escritorio:
-   * - Solo la prenda activa está expandida; las anteriores y siguientes se minimizan.
+   * - Microcopy compacto: "Prenda 1: Color y talla" para permitir mayor tamaño de fuente sin saltos.
+   * - Tipografía >= 16px (text-base) para máxima legibilidad en celular.
+   * - Swatches de color >= 44x44px y botones de talla >= 44px de alto para pulsación cómoda con el pulgar.
    * - Al seleccionar un color, se minimiza la prenda actual y avanza automáticamente a la siguiente.
-   * - Cada prenda minimizada muestra un resumen claro con color y talla, y se puede reabrir al tocarla.
    */
   _renderSlots() {
     // Si solo hay 1 prenda (Combo Individual), renderizado expandido directo sin acordeón
@@ -465,43 +519,43 @@ export class ComboModal {
 
       return `
         <div class="p-4 sm:p-5 rounded-2xl border-2 border-neutral-900 bg-white shadow-xs" data-slot-block="0">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-bold text-neutral-900 flex items-center gap-2">
-              <span class="w-6 h-6 rounded-full ${
+          <div class="flex items-center justify-between mb-3.5">
+            <h3 class="text-base font-bold text-neutral-900 flex items-center gap-2.5">
+              <span class="w-7 h-7 rounded-full ${
                 hasSelected ? 'bg-emerald-600 text-white' : 'border-2 border-neutral-300 bg-white text-neutral-500'
               } text-xs flex items-center justify-center font-bold">
                 ${
                   hasSelected
-                    ? `<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>`
+                    ? `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>`
                     : '1'
                 }
               </span>
-              <span>Elige color y talla de tu prenda</span>
+              <span>Prenda 1: Color y talla</span>
             </h3>
-            <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${
+            <span class="text-xs sm:text-sm font-bold px-2.5 py-1 rounded-full ${
               hasSelected ? 'bg-neutral-100 text-neutral-800 border border-neutral-200' : 'bg-amber-50 text-amber-800 border border-amber-200'
             }">
               <span class="capitalize" data-slot-color-label="0">${hasSelected ? colorObj.label : 'Sin elegir'}</span>
             </span>
           </div>
 
-          <div class="space-y-1.5 mb-4">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-500 block">1. Color de la camiseta:</span>
-            <div class="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+          <div class="space-y-2 mb-4">
+            <span class="text-base font-bold text-neutral-900 block text-center sm:text-left">1. Color de la camiseta:</span>
+            <div class="flex items-center justify-center sm:justify-start gap-2.5 sm:gap-3 flex-wrap">
               ${COLORES_DISPONIBLES.map((c) => {
                 const isSelected = hasSelected && slot.color === c.id;
                 return `
                   <button type="button" data-slot-color-btn="${c.id}" data-slot-idx="0" title="${c.label}"
-                    class="w-9 h-9 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all ${
-                      c.border ? 'border border-neutral-300' : ''
+                    class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all ${
+                      c.border ? 'border-2 border-neutral-300' : ''
                     } ${
                       isSelected
-                        ? 'ring-2 ring-offset-2 ring-neutral-900 scale-110 shadow-sm'
-                        : 'hover:scale-105 opacity-85 hover:opacity-100 ring-1 ring-black/5 active:scale-95'
+                        ? 'ring-2 ring-offset-2 ring-neutral-900 scale-105 shadow-md'
+                        : 'hover:scale-105 opacity-90 hover:opacity-100 ring-1 ring-black/10 active:scale-95'
                     }" style="background-color: ${c.hex}">
                     ${
                       isSelected
-                        ? `<svg class="w-4 h-4 sm:w-3.5 sm:h-3.5 ${
+                        ? `<svg class="w-5 h-5 ${
                             c.id === 'blanco' || c.id === 'gris-claro' ? 'text-neutral-950' : 'text-white'
                           }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>`
                         : ''
@@ -512,19 +566,19 @@ export class ComboModal {
             </div>
           </div>
 
-          <div class="pt-3 border-t border-neutral-100">
-            <div class="flex items-center justify-between text-xs text-neutral-500 mb-1.5 font-medium">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-500">2. Talla:</span>
-              <span class="text-neutral-900 font-bold text-xs" data-slot-size-label="0">
+          <div class="pt-3 border-t border-neutral-100 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-base font-bold text-neutral-900">2. Talla:</span>
+              <span class="text-base font-extrabold text-neutral-900" data-slot-size-label="0">
                 ${slot.size ? `Talla ${slot.size}` : 'Elige una talla'}
               </span>
             </div>
-            <div class="grid grid-cols-6 gap-1.5 sm:gap-2">
+            <div class="grid grid-cols-6 gap-2">
               ${TALLAS_DISPONIBLES.map((t) => {
                 const isSelected = slot.size === t;
                 return `
                   <button type="button" data-slot-size-btn="${t}" data-slot-idx="0"
-                    class="py-2 text-xs font-semibold rounded-xl text-center transition-all ${
+                    class="min-h-[44px] py-2.5 px-3 text-base font-bold rounded-xl text-center transition-all flex items-center justify-center ${
                       isSelected
                         ? 'bg-neutral-900 text-white border-2 border-neutral-900 shadow-sm font-bold'
                         : 'bg-white text-neutral-700 border border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50 active:scale-95'
@@ -547,53 +601,53 @@ export class ComboModal {
         const hasSelected = slot.colorSeleccionado === true;
 
         if (!isExpanded) {
-          // Vista MINIMIZADA (Colapsada) - Compacta y ligera para celulares
+          // Vista MINIMIZADA (Colapsada) - Compacta y táctil para celulares
           return `
-            <div class="p-3 sm:p-3.5 rounded-2xl border border-neutral-200 bg-neutral-50/90 hover:bg-neutral-100/90 hover:border-neutral-300 transition-all duration-200 flex items-center justify-between gap-3 cursor-pointer group shadow-2xs"
-              data-slot-toggle="${idx}" role="button" tabindex="0" aria-label="Editar Camiseta ${slot.index}" aria-expanded="false">
+            <div class="p-3.5 sm:p-4 rounded-2xl border border-neutral-200 bg-neutral-50/90 hover:bg-neutral-100/90 hover:border-neutral-300 transition-all duration-200 flex items-center justify-between gap-3 cursor-pointer group shadow-2xs min-h-[58px]"
+              data-slot-toggle="${idx}" role="button" tabindex="0" aria-label="Editar Prenda ${slot.index}" aria-expanded="false">
               
-              <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div class="flex items-center gap-3 min-w-0">
                 ${
                   hasSelected
                     ? `
                       <!-- Círculo de check verde una vez ya haya seleccionado -->
-                      <span class="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs flex items-center justify-center font-bold flex-shrink-0 group-hover:scale-105 transition-transform shadow-xs">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                      <span class="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs flex items-center justify-center font-bold flex-shrink-0 group-hover:scale-105 transition-transform shadow-xs">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       </span>
                     `
                     : `
                       <!-- Círculo en blanco si aún no ha seleccionado -->
-                      <span class="w-6 h-6 rounded-full border-2 border-neutral-300 bg-white text-neutral-400 text-xs flex items-center justify-center font-bold flex-shrink-0 group-hover:border-neutral-400 transition-colors shadow-2xs">
+                      <span class="w-7 h-7 rounded-full border-2 border-neutral-300 bg-white text-neutral-400 text-xs flex items-center justify-center font-bold flex-shrink-0 group-hover:border-neutral-400 transition-colors shadow-2xs">
                         ${slot.index}
                       </span>
                     `
                 }
                 
                 <div class="flex flex-col min-w-0">
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="text-xs sm:text-sm font-bold text-neutral-900">
-                      Camiseta #${slot.index}
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-sm sm:text-base font-bold text-neutral-900">
+                      Prenda ${slot.index}: Color y talla
                     </span>
                     ${
                       hasSelected
                         ? `
-                          <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-neutral-800 bg-white px-2 py-0.5 rounded-full border border-neutral-200 shadow-2xs">
-                            <span class="w-2.5 h-2.5 rounded-full border border-neutral-300 flex-shrink-0" style="background-color: ${colorObj.hex}"></span>
+                          <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-800 bg-white px-2.5 py-0.5 rounded-full border border-neutral-200 shadow-2xs">
+                            <span class="w-3 h-3 rounded-full border border-neutral-300 flex-shrink-0" style="background-color: ${colorObj.hex}"></span>
                             <span class="capitalize">${colorObj.label}</span>
                           </span>
                         `
                         : `
-                          <span class="inline-flex items-center gap-1 text-[11px] font-medium text-neutral-500 bg-neutral-200/60 px-2 py-0.5 rounded-full border border-neutral-200">
-                            <span class="w-2 h-2 rounded-full border border-neutral-400 bg-white flex-shrink-0"></span>
+                          <span class="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-500 bg-neutral-200/60 px-2.5 py-0.5 rounded-full border border-neutral-200">
+                            <span class="w-2.5 h-2.5 rounded-full border border-neutral-400 bg-white flex-shrink-0"></span>
                             <span>Sin seleccionar</span>
                           </span>
                         `
                     }
                   </div>
-                  <span class="text-[11px] text-neutral-500 font-medium mt-0.5">
-                    Talla seleccionada: <strong class="text-neutral-800">${slot.size || 'M'}</strong>
+                  <span class="text-xs text-neutral-500 font-medium mt-0.5">
+                    Talla seleccionada: <strong class="text-neutral-800 font-bold">${slot.size || 'M'}</strong>
                   </span>
                 </div>
               </div>
@@ -617,40 +671,34 @@ export class ComboModal {
           <div class="p-4 sm:p-5 rounded-2xl border-2 border-neutral-900 bg-white shadow-md transition-all duration-200" data-slot-block="${idx}" aria-expanded="true">
             
             <!-- Encabezado del Slot Expandido (click para colapsar) -->
-            <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-neutral-100 cursor-pointer" data-slot-header="${idx}" title="Click para colapsar">
+            <div class="flex items-center justify-between mb-3.5 pb-2.5 border-b border-neutral-100 cursor-pointer" data-slot-header="${idx}" title="Click para colapsar">
               <div class="flex items-center gap-2.5">
-                <span class="w-6 h-6 rounded-full ${
+                <span class="w-7 h-7 rounded-full ${
                   hasSelected ? 'bg-emerald-600 text-white' : 'bg-neutral-900 text-white'
                 } text-xs flex items-center justify-center font-black">
                   ${
                     hasSelected
-                      ? `<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>`
+                      ? `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>`
                       : slot.index
                   }
                 </span>
                 <div>
-                  <h3 class="text-xs sm:text-sm font-bold text-neutral-900 leading-tight">
-                    ${
-                      slot.index === 1
-                        ? 'Elige color y talla de la 1ª prenda'
-                        : slot.index === 2
-                        ? 'Elige color y talla de la 2ª prenda'
-                        : `Elige color y talla de la prenda #${slot.index}`
-                    }
+                  <h3 class="text-base font-bold text-neutral-900 leading-tight">
+                    Prenda ${slot.index}: Color y talla
                   </h3>
-                  <p class="text-[11px] text-neutral-500 sm:hidden">
+                  <p class="text-xs text-neutral-500 sm:hidden mt-0.5">
                     ${hasSelected ? 'Color listo. Toca otro si deseas cambiarlo' : idx + 1 < this.slots.length ? 'Elige un color para pasar a la siguiente' : 'Elige tu color preferido'}
                   </p>
                 </div>
               </div>
               
-              <div class="flex items-center gap-1.5">
-                <span class="text-xs font-semibold px-2 py-0.5 rounded-md ${
+              <div class="flex items-center gap-2">
+                <span class="text-xs sm:text-sm font-bold px-2.5 py-1 rounded-md ${
                   hasSelected ? 'bg-neutral-100 text-neutral-800 border border-neutral-200' : 'bg-amber-50 text-amber-800 border border-amber-200'
                 }">
                   <span class="capitalize" data-slot-color-label="${idx}">${hasSelected ? colorObj.label : 'Sin elegir'}</span>
                 </span>
-                <button type="button" class="p-1 text-neutral-400 hover:text-neutral-800 rounded-lg hover:bg-neutral-100 transition-colors" aria-label="Minimizar">
+                <button type="button" class="p-1.5 text-neutral-400 hover:text-neutral-800 rounded-lg hover:bg-neutral-100 transition-colors" aria-label="Minimizar">
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
                   </svg>
@@ -658,34 +706,34 @@ export class ComboModal {
               </div>
             </div>
 
-            <!-- 1. Swatches de Color -->
-            <div class="space-y-1.5 mb-4">
+            <!-- 1. Swatches de Color (mínimo 44x44px) -->
+            <div class="space-y-2 mb-4">
               <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-600">
+                <span class="text-base font-bold text-neutral-900">
                   1. Color de la camiseta:
                 </span>
                 ${idx + 1 < this.slots.length ? `
-                  <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                  <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1">
                     <span>Avanza a la #${slot.index + 1} al elegir</span>
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                   </span>
                 ` : ''}
               </div>
-              <div class="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+              <div class="flex items-center justify-center sm:justify-start gap-2.5 sm:gap-3 flex-wrap">
                 ${COLORES_DISPONIBLES.map((c) => {
                   const isSelected = hasSelected && slot.color === c.id;
                   return `
                     <button type="button" data-slot-color-btn="${c.id}" data-slot-idx="${idx}" title="${c.label}"
-                      class="w-9 h-9 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all ${
-                        c.border ? 'border border-neutral-300' : ''
+                      class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all ${
+                        c.border ? 'border-2 border-neutral-300' : ''
                       } ${
                         isSelected
-                          ? 'ring-2 ring-offset-2 ring-neutral-900 scale-110 shadow-sm'
-                          : 'hover:scale-105 opacity-85 hover:opacity-100 ring-1 ring-black/5 active:scale-95'
+                          ? 'ring-2 ring-offset-2 ring-neutral-900 scale-105 shadow-md'
+                          : 'hover:scale-105 opacity-90 hover:opacity-100 ring-1 ring-black/10 active:scale-95'
                       }" style="background-color: ${c.hex}">
                       ${
                         isSelected
-                          ? `<svg class="w-4 h-4 sm:w-3.5 sm:h-3.5 ${
+                          ? `<svg class="w-5 h-5 ${
                               c.id === 'blanco' || c.id === 'gris-claro' ? 'text-neutral-950' : 'text-white'
                             }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>`
                           : ''
@@ -696,20 +744,20 @@ export class ComboModal {
               </div>
             </div>
 
-            <!-- 2. Chips de Talla -->
-            <div class="pt-3 border-t border-neutral-100">
-              <div class="flex items-center justify-between text-xs text-neutral-500 mb-1.5 font-medium">
-                <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-600">2. Talla Camiseta #${slot.index}:</span>
-                <span class="text-neutral-900 font-bold text-xs" data-slot-size-label="${idx}">
+            <!-- 2. Chips de Talla (mínimo 44px de altura) -->
+            <div class="pt-3 border-t border-neutral-100 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-base font-bold text-neutral-900">2. Talla de la prenda:</span>
+                <span class="text-base font-extrabold text-neutral-900" data-slot-size-label="${idx}">
                   ${slot.size ? `Talla ${slot.size}` : 'Elige una talla'}
                 </span>
               </div>
-              <div class="grid grid-cols-6 gap-1.5 sm:gap-2">
+              <div class="grid grid-cols-6 gap-2">
                 ${TALLAS_DISPONIBLES.map((t) => {
                   const isSelected = slot.size === t;
                   return `
                     <button type="button" data-slot-size-btn="${t}" data-slot-idx="${idx}"
-                      class="py-2 text-xs font-semibold rounded-xl text-center transition-all ${
+                      class="min-h-[44px] py-2.5 px-3 text-base font-bold rounded-xl text-center transition-all flex items-center justify-center ${
                         isSelected
                           ? 'bg-neutral-900 text-white border-2 border-neutral-900 shadow-sm font-bold'
                           : 'bg-white text-neutral-700 border border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50 active:scale-95'
@@ -730,12 +778,14 @@ export class ComboModal {
   bindEvents() {
     if (!this.modalEl) return;
 
-    // Cierre por botón X
-    this.modalEl.querySelector('[data-modal-close]')?.addEventListener('click', () => {
-      this.close();
+    // Cierre por botón X (Mobile y Desktop) o botón Atrás (Mobile)
+    this.modalEl.querySelectorAll('[data-modal-close], [data-modal-back]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        this.close();
+      });
     });
 
-    // Cierre por click en backdrop
+    // Cierre por click en backdrop (solo en desktop)
     this.modalEl.addEventListener('click', (e) => {
       if (e.target === this.modalEl) {
         this.close();
@@ -877,9 +927,10 @@ export class ComboModal {
       guidePanel?.classList.add('hidden');
     });
 
-    // Submit / Agregar al Carrito
-    this.modalEl.querySelector('[data-modal-submit]')?.addEventListener('click', () => {
-      if (this.esValido) {
+    // Submit / Agregar al Carrito (escucha tanto en desktop como en mobile sticky footer)
+    this.modalEl.addEventListener('click', (e) => {
+      const submitBtn = e.target.closest('[data-modal-submit]');
+      if (submitBtn && this.esValido) {
         this._confirmarCompra();
       }
     });
@@ -925,10 +976,9 @@ export class ComboModal {
       this.combo.imagen = comboDuoInfo.ruta;
 
       // Actualizar también la card en el grid principal de la tienda
-      const cardImg = document.querySelector(`[data-combo-card-img="${this.combo.id}"]`);
-      if (cardImg) {
-        cardImg.src = comboDuoInfo.ruta;
-      }
+      document.querySelectorAll(`[data-combo-card-img="${this.combo.id}"]`).forEach((img) => {
+        img.src = comboDuoInfo.ruta;
+      });
 
       const c1Label = COLORES_DISPONIBLES.find((c) => c.id === this.slots[0].color)?.label || this.slots[0].color;
       const c2Label = COLORES_DISPONIBLES.find((c) => c.id === this.slots[1].color)?.label || this.slots[1].color;
@@ -953,36 +1003,30 @@ export class ComboModal {
       modalPreviewPill.innerHTML = this._renderModalPillContent();
     }
 
-    // Actualizar también los colores debajo de la camiseta en el card principal de la tienda
-    const cardColorsEl = document.querySelector(`[data-combo-card-colors="${this.combo.id}"]`);
-    if (cardColorsEl) {
-      cardColorsEl.innerHTML = renderComboCardColors(this.combo, this.slots);
-    }
-
     // Re-renderizar configuración de la derecha
     const slotsContainer = this.modalEl.querySelector('[data-slots-container]');
     if (slotsContainer) {
       slotsContainer.innerHTML = this.esCombo6 ? this._renderCombo6Content() : this._renderSlots();
     }
 
-    // Actualizar CTA
-    const btnSubmit = this.modalEl.querySelector('[data-modal-submit]');
-    const ctaText = this.modalEl.querySelector('[data-cta-text]');
+    // Actualizar CTAs (Tanto en desktop como en el sticky footer mobile)
+    const btnsSubmit = this.modalEl.querySelectorAll('[data-modal-submit]');
+    const ctaTexts = this.modalEl.querySelectorAll('[data-cta-text]');
 
-    if (btnSubmit) {
+    btnsSubmit.forEach((btnSubmit) => {
       btnSubmit.disabled = !this.esValido;
       if (this.esValido) {
         btnSubmit.className =
-          'w-full py-4 rounded-2xl font-bold transition-all duration-200 flex items-center justify-center gap-2 text-sm uppercase tracking-wider bg-neutral-900 hover:bg-black text-white shadow-lg shadow-neutral-900/10 cursor-pointer active:scale-[0.99]';
+          'w-full py-4 rounded-2xl font-bold transition-all duration-200 flex items-center justify-center gap-2 text-sm uppercase tracking-wider bg-neutral-900 hover:bg-black text-white shadow-lg shadow-neutral-900/15 cursor-pointer active:scale-[0.98]';
       } else {
         btnSubmit.className =
           'w-full py-4 rounded-2xl font-bold transition-all duration-200 flex items-center justify-center gap-2 text-sm uppercase tracking-wider bg-neutral-200 text-neutral-400 cursor-not-allowed';
       }
-    }
+    });
 
-    if (ctaText) {
+    ctaTexts.forEach((ctaText) => {
       ctaText.textContent = this.ctaTexto;
-    }
+    });
 
     renderIcons(this.modalEl);
   }
@@ -1036,7 +1080,16 @@ export class ComboModal {
     const el = this.render();
     document.body.appendChild(el);
 
-    // 2. Bloquear scroll general del documento
+    // Animación Slide-Over fluida estilo Temu para celulares (< 768px)
+    requestAnimationFrame(() => {
+      const panel = el.querySelector('[data-modal-panel]');
+      if (panel) {
+        panel.classList.remove('translate-x-full');
+        panel.classList.add('translate-x-0');
+      }
+    });
+
+    // Bloquear scroll general del documento
     window.__lenis?.stop();
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
@@ -1044,6 +1097,22 @@ export class ComboModal {
   }
 
   close() {
+    if (this._isClosing) return;
+    this._isClosing = true;
+
+    const panel = this.modalEl?.querySelector('[data-modal-panel]');
+    // Si estamos en celular, animar slide-out hacia la derecha
+    if (panel && window.innerWidth < 768) {
+      panel.classList.remove('translate-x-0');
+      panel.classList.add('translate-x-full');
+      this.modalEl.classList.add('opacity-0');
+      setTimeout(() => this._cleanupModal(), 250);
+    } else {
+      this._cleanupModal();
+    }
+  }
+
+  _cleanupModal() {
     document.removeEventListener('keydown', this._handleKeyDown);
     if (this.modalEl) {
       this.modalEl.removeEventListener('wheel', this._preventBodyScroll);
@@ -1053,6 +1122,7 @@ export class ComboModal {
       }
     }
     this.modalEl = null;
+    this._isClosing = false;
 
     // Restaurar scroll general
     window.__lenis?.start();

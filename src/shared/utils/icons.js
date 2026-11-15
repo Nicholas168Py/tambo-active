@@ -19,7 +19,9 @@ import {
   AlertCircle,
   RefreshCw,
   Rotate3d,
-  ArrowDown
+  ArrowDown,
+  LayoutGrid,
+  List
 } from 'lucide';
 
 /**
@@ -46,7 +48,9 @@ const ICONOS = {
   AlertCircle,
   RefreshCw,
   Rotate3d,
-  ArrowDown
+  ArrowDown,
+  LayoutGrid,
+  List
 };
 
 /**

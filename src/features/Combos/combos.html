@@ -1,23 +1,37 @@
 <!-- BEGIN: Combos Section -->
-<section id="combos" class="py-8 md:py-12 bg-neutral-50 dark:bg-brand-black text-black dark:text-white relative overflow-hidden border-b border-neutral-200 dark:border-white/10 transition-colors duration-300">
+<section id="combos" class="py-4 md:py-6 lg:py-8 bg-neutral-50 dark:bg-brand-black text-black dark:text-white relative overflow-hidden border-b border-neutral-200 dark:border-white/10 transition-colors duration-300">
   <div class="w-full lg:max-w-none mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 relative z-10">
     
-    <!-- Encabezado de la Sección -->
-    <div class="text-center max-w-3xl mx-auto mb-8 md:mb-10" data-reveal>
-      <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-black/5 dark:bg-white/10 text-black dark:text-white border border-black/10 dark:border-white/20 mb-3">
-        <span class="w-2 h-2 rounded-full bg-black dark:bg-white animate-pulse"></span>
+    <!-- Encabezado de la Sección (Compacto para visibilidad completa en escritorio) -->
+    <div class="text-center max-w-2xl mx-auto mb-3 sm:mb-4 lg:mb-5" data-reveal>
+      <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest bg-black/5 dark:bg-white/10 text-black dark:text-white border border-black/10 dark:border-white/20 mb-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-black dark:bg-white animate-pulse"></span>
         Combos y Promociones
       </span>
-      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-black dark:text-white leading-tight">
+      <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight text-black dark:text-white leading-tight">
         LLEVA MÁS, PAGA MENOS
       </h2>
-      <p class="text-black dark:text-white text-base sm:text-lg mt-3 leading-relaxed font-medium">
-        Elige tu combo favorito, combina los colores que quieras y distribuye las tallas libremente como tú prefieras.
+      <p class="text-neutral-600 dark:text-neutral-300 text-xs sm:text-sm mt-1 leading-snug font-medium max-w-xl mx-auto">
+        Elige tu combo favorito, combina los colores que quieras y distribuye las tallas libremente.
       </p>
     </div>
 
+    <!-- Toggle de vista Cuadrícula / Lista (Solo visible en Mobile < md) -->
+    <div class="flex md:hidden items-center justify-end mb-3" data-combos-view-controls>
+      <div class="inline-flex items-center p-1 rounded-xl bg-neutral-200/70 dark:bg-neutral-800/80 border border-neutral-300/70 dark:border-neutral-700/60 shadow-inner">
+        <button type="button" data-view-btn="grid" class="flex items-center gap-1.5 py-1 px-2.5 rounded-lg text-xs font-semibold transition-all duration-200" aria-label="Vista cuadrícula">
+          <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+          <span>Cuadrícula</span>
+        </button>
+        <button type="button" data-view-btn="list" class="flex items-center gap-1.5 py-1 px-2.5 rounded-lg text-xs font-semibold transition-all duration-200" aria-label="Vista lista">
+          <i data-lucide="list" class="w-3.5 h-3.5"></i>
+          <span>Lista</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Grid de Combos (4 Cards) -->
-    <div class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" data-combos-grid data-reveal>
+    <div class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-4 xl:gap-5" data-combos-grid data-reveal>
       <!-- Inyectado dinámicamente -->
     </div>
 

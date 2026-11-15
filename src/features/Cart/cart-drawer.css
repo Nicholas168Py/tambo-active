@@ -6,12 +6,21 @@
   pointer-events: auto;
 }
 
+.cart-backdrop {
+  will-change: opacity;
+}
+
+.cart-panel {
+  will-change: transform;
+  transform: translate3d(100%, 0, 0);
+}
+
 #cart-drawer-root.is-open .cart-backdrop {
   opacity: 1;
 }
 
 #cart-drawer-root.is-open .cart-panel {
-  transform: translateX(0);
+  transform: translate3d(0, 0, 0);
 }
 
 /* Scrollbar personalizado oscuro para el Drawer */

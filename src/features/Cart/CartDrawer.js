@@ -62,6 +62,20 @@ export class CartDrawer extends Component {
       this.on(btnCheckout, 'click', () => this._handleCheckout());
     }
 
+    // Botón secundario: Seguir comprando (cierra el carrito y hace scroll suave a #combos)
+    const btnContinue = this.query('[data-continue-shopping-btn]');
+    if (btnContinue) {
+      this.on(btnContinue, 'click', () => {
+        cartStore.closeDrawer();
+        const target = document.querySelector('#combos') || document.querySelector('#colores');
+        if (target) {
+          setTimeout(() => {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }, 150);
+        }
+      });
+    }
+
     // Botón alternativo de pago por WhatsApp (fallback)
     const btnFallbackWa = this.query('[data-checkout-fallback-wa]');
     if (btnFallbackWa) {
@@ -181,8 +195,12 @@ export class CartDrawer extends Component {
       if (emptyCta) {
         emptyCta.addEventListener('click', () => {
           cartStore.closeDrawer();
-          const target = document.querySelector('#colores');
-          if (target) target.scrollIntoView({ behavior: 'smooth' });
+          const target = document.querySelector('#combos') || document.querySelector('#colores');
+          if (target) {
+            setTimeout(() => {
+              target.scrollIntoView({ behavior: 'smooth' });
+            }, 150);
+          }
         });
       }
 
@@ -195,10 +213,10 @@ export class CartDrawer extends Component {
       .map(
         (item) => `
         <div class="cart-item-card p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex gap-3 relative group transition-colors" data-cart-item-id="${item.id}">
-          <!-- Miniatura con indicador de color -->
-          <div class="w-16 h-16 rounded-lg bg-slate-200/80 dark:bg-black/40 border border-slate-300 dark:border-white/10 flex-shrink-0 flex items-center justify-center relative overflow-hidden p-1.5 transition-colors">
+          <!-- Miniatura con indicador de color (Safari fix: min-w, min-h, block object-contain) -->
+          <div class="w-16 h-16 min-w-[64px] min-h-[64px] rounded-lg bg-slate-200/80 dark:bg-black/40 border border-slate-300 dark:border-white/10 flex-shrink-0 flex items-center justify-center relative overflow-hidden p-1.5 transition-colors">
             <div class="absolute inset-0 opacity-20" style="background-color: ${item.colorHex}"></div>
-            <img src="${item.imagePreview}" alt="${item.name}" class="w-full h-full object-contain relative z-10" loading="lazy" />
+            <img src="${item.imagePreview}" alt="${item.name}" class="w-full h-full max-w-full max-h-full object-contain relative z-10 block" loading="lazy" />
             <span class="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full border border-white/60 shadow-sm" style="background-color: ${item.colorHex}" title="${item.color}"></span>
           </div>
 

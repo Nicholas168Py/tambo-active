@@ -14,7 +14,7 @@ export const COMBOS_DATA = [
     imagen: '/hero/camisa-hero.png',
     descripcionRegla: 'Escoge 1 color y 1 talla a tu elección.',
     beneficios: [
-      '1 Camiseta deportiva Heavyweight',
+      '1 Camiseta deportiva premium',
       'Selección libre de color y talla'
     ]
   },
