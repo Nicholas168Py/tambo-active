@@ -64,7 +64,11 @@ export class Router {
     // Anclas de página (p. ej. #colores): las maneja el navegador.
     if (hash && !hash.startsWith('#/')) return;
 
-    const ruta = hash.replace(/^#/, '') || '/';
+    let ruta = hash.replace(/^#/, '');
+    if (!ruta) {
+      const pathname = window.location.pathname.replace(/\/$/, '') || '/';
+      ruta = this.routes[pathname] ? pathname : '/';
+    }
 
     // Evita re-montar si ya estamos en la misma ruta.
     if (ruta === this._currentPath && this._current) return;

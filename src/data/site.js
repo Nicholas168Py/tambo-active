@@ -4,7 +4,7 @@
 export const SITIO = {
   nombre: 'Tambo Active',
   descripcion:
-    'Camiseta deportiva premium de alto gramaje. Personaliza tu color y logo y recibe tu camiseta en la puerta de tu casa.',
+    'Camiseta deportiva premium de Alta calidad. Personaliza tu color y logo y recibe tu camiseta en la puerta de tu casa.',
   dominio: 'tamboactive.infinityfreeapp.com',
   canonical: 'tamboactive.infinityfreeapp.com/',
   telefonoDisplay: '+57 311 224 7905',

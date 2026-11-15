@@ -4,8 +4,10 @@ import './shared/styles/base.css';
 import './shared/styles/animations.css';
 
 import { App } from './core/App.js';
+import { themeManager } from './core/ThemeManager.js';
 
-// Marca que JS está activo para habilitar los estados base de reveal.
+// Inicializar tema y registrar estado de JS
+themeManager.init();
 document.documentElement.classList.add('js');
 
 document.addEventListener('DOMContentLoaded', () => {

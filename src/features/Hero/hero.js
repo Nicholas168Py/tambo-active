@@ -1,17 +1,14 @@
 import gsap from 'gsap';
 import { Component } from '../../core/Component.js';
 import { prefiereMovimientoReducido } from '../../shared/utils/reduceMotion.js';
-import { whatsappButton } from '../../shared/components/WhatsAppButton.js';
-import { enlaceWhatsAppInformacion } from '../../shared/utils/whatsapp.js';
+import { renderIcons } from '../../shared/utils/icons.js';
+import { PRODUCTO_CONFIG, formatearCOP } from '../../data/product.js';
 import template from './hero.html?raw';
 import './hero.css';
 
-const CTA_CLASES =
-  'inline-flex items-center justify-center px-8 py-4 rounded-full text-brand-black bg-brand-green font-bold text-lg hover:bg-opacity-90 transition-all duration-300 gap-2 shadow-lg shadow-brand-green/20';
-
 /**
  * Hero: entrada premium con escalonado suave de texto,
- * CTAs y camiseta. Solo anima si el usuario permite movimiento.
+ * indicador de precio/envío, CTAs y camiseta.
  */
 export class Hero extends Component {
   constructor() {
@@ -20,13 +17,24 @@ export class Hero extends Component {
 
   render() {
     super.render();
-    const cta = this.query('[data-cta-hero]');
-    if (cta) {
-      cta.innerHTML = whatsappButton({
-        text: 'COMPRAR POR WHATSAPP',
-        href: enlaceWhatsAppInformacion(),
-        iconClass: 'w-6 h-6',
-        classes: CTA_CLASES
+
+    const priceEl = this.query('[data-hero-price]');
+    if (priceEl) {
+      priceEl.textContent = formatearCOP(PRODUCTO_CONFIG.precioUnitario);
+    }
+
+    renderIcons(this.root);
+  }
+
+  bindEvents() {
+    const ctaPrincipal = this.query('[data-hero-cta-primary]');
+    if (ctaPrincipal) {
+      this.on(ctaPrincipal, 'click', (e) => {
+        const destino = document.querySelector('#colores');
+        if (destino) {
+          e.preventDefault();
+          destino.scrollIntoView({ behavior: 'smooth' });
+        }
       });
     }
   }

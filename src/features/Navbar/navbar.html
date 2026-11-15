@@ -1,47 +1,107 @@
 <!-- BEGIN: Navigation -->
 <nav aria-label="Navegación principal"
-  class="fixed w-full z-50 bg-brand-black/90 backdrop-blur-md border-b border-white/10 transition-all duration-300">
+  class="fixed w-full z-50 bg-[#09090b]/95 backdrop-blur-md border-b border-white/10 transition-colors duration-300">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between items-center h-20">
+    <div class="flex justify-between items-center h-20 sm:h-22 lg:h-24 py-0">
       <!-- Logo -->
-      <div class="flex-shrink-0 flex items-center">
-        <a class="flex items-center gap-2 group" href="#" aria-label="Tambo Active, inicio">
-          <img src="/tu-logo.png" alt="Tambo Active"
-            class="w-10 h-10 object-contain group-hover:opacity-90 transition-opacity" />
-          <span class="text-white font-bold text-xl tracking-wider group-hover:text-brand-green transition-colors">TAMBO
-            ACTIVE</span>
+      <div class="flex-shrink-0 flex items-center p-0 py-0">
+        <a class="flex items-center group p-0 py-0" href="#" aria-label="Tambo Active, inicio">
+          <img src="/logo-removebg.png" alt="Tambo Active Logo"
+            class="h-14 md:h-16 lg:h-20 w-auto object-contain transition-transform duration-200 group-hover:scale-105" />
         </a>
       </div>
       <!-- Desktop Menu -->
-      <div class="hidden md:flex space-x-8">
-        <a class="text-gray-300 hover:text-white text-sm font-medium transition-colors" href="#">Inicio</a>
-        <a class="text-gray-300 hover:text-white text-sm font-medium transition-colors" href="#colores">Combinación</a>
-        <a class="text-gray-300 hover:text-white text-sm font-medium transition-colors" href="#calidad">Calidad</a>
-        <a class="text-gray-300 hover:text-white text-sm font-medium transition-colors"
-          href="#testimonios">Testimonios</a>
-        <a class="text-gray-300 hover:text-white text-sm font-medium transition-colors" href="#contacto">Contáctanos</a>
+      <div class="hidden md:flex space-x-8 items-center">
+        <a class="text-neutral-300 hover:text-white text-base lg:text-lg font-medium transition-colors" href="#">Inicio</a>
+        <a class="text-neutral-300 hover:text-white text-base lg:text-lg font-medium transition-colors" href="#combos">Combos</a>
+        <a class="text-neutral-300 hover:text-white text-base lg:text-lg font-medium transition-colors" href="#colores">Catálogo Interactivo</a>
+        <a class="text-neutral-300 hover:text-white text-base lg:text-lg font-medium transition-colors" href="#calidad">Calidad</a>
+        <a class="text-neutral-300 hover:text-white text-base lg:text-lg font-medium transition-colors" href="#contacto">Contáctanos</a>
       </div>
-      <!-- CTA Button -->
-      <div class="hidden md:flex items-center" data-cta-nav-desktop></div>
-      <!-- Mobile: hamburger -->
-      <button id="menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-movil"
-        class="md:hidden inline-flex items-center justify-center w-11 h-11 rounded-xl text-white hover:bg-white/10 active:bg-white/15 transition-colors">
-        <i data-lucide="menu" class="w-7 h-7"></i>
-      </button>
+      <!-- Actions: Theme Toggle + WhatsApp Support + Cart Button -->
+      <div class="hidden md:flex items-center gap-3 sm:gap-4" data-actions-nav-desktop>
+        <!-- Interactive Theme Toggle Button with Microinteraction -->
+        <button type="button" data-theme-toggle id="theme-toggle-desktop"
+          aria-label="Cambiar a modo oscuro" title="Cambiar tema (Claro / Oscuro)"
+          class="theme-toggle-btn relative w-10 h-10 rounded-full text-white bg-white/5 hover:bg-white/15 border border-white/15 transition-all duration-300 flex items-center justify-center hover:scale-105 active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+          <span class="sr-only">Alternar modo claro y oscuro</span>
+          
+          <!-- Sun Icon (Visible in Light mode, transitions away in Dark) -->
+          <svg class="theme-icon-sun w-5 h-5 text-amber-400 transition-all duration-500 ease-out transform rotate-0 scale-100 opacity-100 dark:rotate-90 dark:scale-0 dark:opacity-0 group-hover:rotate-45"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+
+          <!-- Moon Icon (Hidden in Light mode, springs in during Dark) -->
+          <svg class="theme-icon-moon w-5 h-5 text-blue-300 transition-all duration-500 ease-out transform -rotate-90 scale-0 opacity-0 dark:rotate-0 dark:scale-100 dark:opacity-100 group-hover:-rotate-12 absolute"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+
+        <a href="#" data-nav-wa-desktop class="inline-flex items-center gap-2 text-xs uppercase tracking-wider font-semibold text-neutral-300 hover:text-white transition-colors py-2 px-3 rounded-full hover:bg-white/10 border border-transparent hover:border-white/10">
+          <span class="nav-wa-icon-slot"></span>
+          <span>¿Dudas? WhatsApp</span>
+        </a>
+
+        <button id="cart-toggle-btn-desktop" data-cart-trigger aria-label="Abrir carrito de compras"
+          class="relative p-2.5 rounded-full text-white bg-white/5 hover:bg-white/15 border border-white/15 transition-all duration-300 flex items-center justify-center hover:scale-105 active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+          <i data-lucide="shopping-cart" class="w-5 h-5 text-neutral-200 group-hover:text-white transition-colors"></i>
+          <span data-cart-count-badge
+            class="absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1 rounded-full bg-white text-black text-[11px] font-black flex items-center justify-center shadow-md scale-0 transition-transform duration-300">
+            0
+          </span>
+        </button>
+      </div>
+
+      <!-- Mobile Right Actions (Theme Toggle + Cart + Menu Toggle) -->
+      <div class="md:hidden flex items-center gap-2">
+        <!-- Theme Toggle Mobile -->
+        <button type="button" data-theme-toggle id="theme-toggle-mobile"
+          aria-label="Cambiar a modo oscuro" title="Cambiar tema"
+          class="theme-toggle-btn relative w-10 h-10 rounded-xl text-white bg-white/10 hover:bg-white/15 active:bg-white/20 transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+          <svg class="theme-icon-sun w-5 h-5 text-amber-400 transition-all duration-500 ease-out transform rotate-0 scale-100 opacity-100 dark:rotate-90 dark:scale-0 dark:opacity-0"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <svg class="theme-icon-moon w-5 h-5 text-blue-300 transition-all duration-500 ease-out transform -rotate-90 scale-0 opacity-0 dark:rotate-0 dark:scale-100 dark:opacity-100 absolute"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+
+        <button id="cart-toggle-btn-mobile" data-cart-trigger aria-label="Abrir carrito de compras"
+          class="relative p-2.5 rounded-xl text-white bg-white/10 hover:bg-white/15 active:bg-white/20 transition-colors flex items-center justify-center">
+          <i data-lucide="shopping-cart" class="w-5 h-5 text-white"></i>
+          <span data-cart-count-badge
+            class="absolute -top-1 -right-1 min-w-[19px] h-[19px] px-1 rounded-full bg-white text-black text-[10px] font-black flex items-center justify-center shadow-md scale-0 transition-transform duration-300">
+            0
+          </span>
+        </button>
+        <button id="menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-movil"
+          class="inline-flex items-center justify-center w-11 h-11 rounded-xl text-white hover:bg-white/10 active:bg-white/20 transition-colors">
+          <i data-lucide="menu" class="w-7 h-7"></i>
+        </button>
+      </div>
     </div>
     <!-- Mobile Menu -->
     <div id="menu-movil"
-      class="md:hidden hidden border-t border-white/10 bg-brand-black/95 backdrop-blur-md px-4 sm:px-6 py-6 space-y-1">
-      <a class="block text-gray-300 hover:text-white text-base font-medium transition-colors py-2.5" href="#">Inicio</a>
-      <a class="block text-gray-300 hover:text-white text-base font-medium transition-colors py-2.5"
-        href="#colores">Combinación</a>
-      <a class="block text-gray-300 hover:text-white text-base font-medium transition-colors py-2.5"
+      class="md:hidden hidden border-t border-white/10 bg-[#09090b]/95 backdrop-blur-md px-4 sm:px-6 py-6 space-y-1">
+      <a class="block text-neutral-300 hover:text-white text-base font-medium transition-colors py-2.5" href="#">Inicio</a>
+      <a class="block text-neutral-300 hover:text-white text-base font-medium transition-colors py-2.5" href="#combos">Combos</a>
+      <a class="block text-neutral-300 hover:text-white text-base font-medium transition-colors py-2.5"
+        href="#colores">Catálogo Interactivo</a>
+      <a class="block text-neutral-300 hover:text-white text-base font-medium transition-colors py-2.5"
         href="#calidad">Calidad</a>
-      <a class="block text-gray-300 hover:text-white text-base font-medium transition-colors py-2.5"
-        href="#testimonios">Testimonios</a>
-      <a class="block text-gray-300 hover:text-white text-base font-medium transition-colors py-2.5"
+      <a class="block text-neutral-300 hover:text-white text-base font-medium transition-colors py-2.5"
         href="#contacto">Contáctanos</a>
-      <div class="pt-4" data-cta-nav-mobile></div>
+      <div class="pt-4 border-t border-white/10" data-cta-nav-mobile>
+        <a href="#" data-nav-wa-mobile
+          class="inline-flex w-full items-center justify-center px-6 py-3 rounded-full border border-white/20 text-sm font-medium text-neutral-200 hover:text-white hover:bg-white/10 transition-all duration-300 gap-2">
+          <span class="nav-wa-icon-slot"></span>
+          <span>¿Dudas? Escríbenos a WhatsApp</span>
+        </a>
+      </div>
     </div>
   </div>
 </nav>

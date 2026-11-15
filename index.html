@@ -6,10 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tambo Active | Camisetas deportivas premium personalizables</title>
   <meta name="description"
-    content="Camiseta deportiva premium de alto gramaje. Elige tu color y logo, personaliza tu camiseta y recíbela en la puerta de tu casa." />
+    content="Camiseta deportiva premium de alta calidad. Elige tu color y logo, personaliza tu camiseta y recíbela en la puerta de tu casa." />
   <meta name="theme-color" content="#0c0c0c" />
   <link rel="canonical" href="https://tamboactive.com/" />
-  <link rel="icon" href="/favicon.png" type="image/png" />
+  <link rel="icon" href="/Tambo-Logo.png" type="image/png" />
+  <link rel="shortcut icon" href="/favicon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
   
 
   <!-- Open Graph -->
@@ -17,7 +19,7 @@
   <meta property="og:site_name" content="Tambo Active" />
   <meta property="og:title" content="Tambo Active | Camisetas deportivas premium personalizables" />
   <meta property="og:description"
-    content="Camiseta deportiva premium de alto gramaje. Elige tu color y logo, personaliza tu camiseta y recíbela en la puerta de tu casa." />
+    content="Camiseta deportiva premium de alta calidad. Elige tu color y logo, personaliza tu camiseta y recíbela en la puerta de tu casa." />
   <meta property="og:url" content="https://tamboactive.com/" />
   <meta property="og:image" content="https://tamboactive.com/hero/camisa-hero.png" />
   <meta property="og:locale" content="es_CO" />
@@ -26,7 +28,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Tambo Active | Camisetas deportivas premium personalizables" />
   <meta name="twitter:description"
-    content="Camiseta deportiva premium de alto gramaje. Elige tu color y logo y recibe tu camiseta en casa." />
+    content="Camiseta deportiva premium de alta calidad. Elige tu color y logo y recibe tu camiseta en casa." />
   <meta name="twitter:image" content="https://tamboactive.com/hero/camisa-hero.png" />
 
   <!-- Schema.org: Producto -->
@@ -35,7 +37,7 @@
       "@context": "https://schema.org",
       "@type": "Product",
       "name": "Camiseta Deportiva Premium Tambo Active",
-      "description": "Camiseta deportiva premium de alto gramaje, transpirable, con costuras reforzadas y logo estampado. Personalizable en color y logo.",
+      "description": "Camiseta deportiva premium de alta calidad, transpirable, con costuras reforzadas y logo estampado. Personalizable en color y logo.",
       "brand": { "@type": "Brand", "name": "Tambo Active" },
       "image": "https://tamboactive.com/hero/camisa-hero.png",
       "offers": {
@@ -63,8 +65,27 @@
     }
   </script>
 
-  <!-- Marca JS activo antes del primer paint (habilita los estados de reveal) -->
-  <script>document.documentElement.classList.add('js');</script>
+  <!-- Marca JS activo e inicializa el tema antes del primer paint (evita FOUC) -->
+  <script>
+    (function () {
+      document.documentElement.classList.add('js');
+      try {
+        var savedTheme = localStorage.getItem('tambo_theme');
+        var theme = savedTheme === 'dark' ? 'dark' : 'light';
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.classList.add('light');
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
 
   <!-- Fuentes: preconnect + carga no bloqueante -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -84,13 +105,13 @@
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" />
   </noscript>
 
-  <!-- Preload exclusivo del hero (solo la camiseta protagonista) -->
-  <link rel="preload" as="image" href="/hero/camisa-hero.png" fetchpriority="high" />
+  <!-- Preload de la imagen principal del Hero -->
+  <link rel="preload" as="image" href="/Corredor.webp" type="image/webp" fetchpriority="high" />
 
   <script type="module" src="/src/main.js"></script>
 </head>
 
-<body class="bg-white text-gray-800 antialiased selection:bg-brand-green selection:text-white">
+<body class="bg-white dark:bg-black text-gray-900 dark:text-gray-100 antialiased selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors duration-300">
   <!-- Contenedor principal: los componentes se montan aquí. -->
   <div id="app"></div>
 </body>

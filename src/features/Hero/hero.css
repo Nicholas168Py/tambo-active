@@ -4,8 +4,16 @@
    niebla, glow de estudio y sombra.
    ============================================ */
 
-/* Capa 1-2: fondo negro + gradientes oscuros */
+/* Capa 1-2: gradientes adaptables para Light y Dark */
 .hero-bg {
+  background:
+    radial-gradient(120% 90% at 82% 12%, rgba(226, 232, 240, 0.75) 0%, transparent 60%),
+    radial-gradient(70% 55% at 8% 92%, rgba(241, 245, 249, 0.85) 0%, transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  transition: background 300ms ease;
+}
+
+html.dark .hero-bg {
   background:
     radial-gradient(120% 90% at 82% 12%, rgba(70, 70, 70, 0.30) 0%, transparent 55%),
     radial-gradient(70% 55% at 8% 92%, rgba(48, 48, 48, 0.35) 0%, transparent 60%),
@@ -220,5 +228,9 @@
     transform: translateY(-50%);
     width: 80%;
     margin: 0;
+  }
+
+  .lg\:pt-28 {
+    padding-top: 6rem;
   }
 }

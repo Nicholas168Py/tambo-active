@@ -9,17 +9,22 @@ import { DecalGeometry } from 'three/examples/jsm/geometries/DecalGeometry.js';
 import { Animator } from './Animator.js';
 import { COLORES } from '../data/colores.js';
 import { LOGOS } from '../data/logos.js';
-import rutaModelo from '../assets/models/camisa.glb';
+import rutaCamisa from '../assets/models/camisa.glb';
+import rutaMangaSiza from '../assets/models/manga-siza.glb';
 
-export { rutaModelo };
+export const RUTAS_MODELOS = {
+  CAMISETA: rutaCamisa,
+  MANGA_SIZA: rutaMangaSiza
+};
+export const rutaModelo = rutaCamisa;
 
 const FOTOGRAFIAS_TRAS_INTERACCION = 26;
 const LOGO_ALTURA_PECHO = 0.73;
 const LOGO_X_PECHO = 0.23;
 const LOGO_TAMANO_MAX = 0.16;
 const LOGO_ESPESOR = 0.15;
-const LOGO_DESPLAZAMIENTO = 0.01;
-const LOGO_LIFT = 0.04;
+const LOGO_DESPLAZAMIENTO = 0.006;
+const LOGO_LIFT = 0.022;
 const PECHO_EXPANSION = 0.22;
 const PECHO_PROFUNDIDAD = 0.2;
 
@@ -61,6 +66,9 @@ export class Configurator3D {
     this._posicionLogo = null;
     this._orientacionLogo = null;
 
+    this._tipoProductoActual = 'CAMISETA';
+    this._rutaModeloActual = rutaCamisa;
+
     this._redimensionar();
     this._observador = new ResizeObserver(() => this._redimensionar());
     this._observador.observe(contenedor);
@@ -71,7 +79,7 @@ export class Configurator3D {
     this._iniciarBucle();
 
     try {
-      const modelo = await cargarModelo(rutaModelo);
+      const modelo = await cargarModelo(this._rutaModeloActual || rutaModelo);
       if (this._destruido) {
         disponerModelo(modelo);
         return;
@@ -143,11 +151,94 @@ export class Configurator3D {
     this._aplicarSeleccion(seleccion);
   }
 
-  /** Colorea los materiales del modelo con el hex del color elegido. */
+  /**
+   * Cambia dinámicamente el modelo 3D (por ejemplo entre CAMISETA y MANGA_SIZA).
+   * Preserva el color seleccionado y el logo de Tambo en su posición calibrada.
+   * @param {'CAMISETA'|'MANGA_SIZA'|string} tipoProductoKey
+   */
+  async cambiarModelo(tipoProductoKey = 'CAMISETA') {
+    const key = String(tipoProductoKey || 'CAMISETA').toUpperCase().includes('SIZA') ? 'MANGA_SIZA' : 'CAMISETA';
+    const nuevaRuta = RUTAS_MODELOS[key] || RUTAS_MODELOS.CAMISETA;
+
+    if (this._tipoProductoActual === key && this._modelo) return;
+    this._tipoProductoActual = key;
+    this._rutaModeloActual = nuevaRuta;
+
+    if (!this._escena) return;
+
+    try {
+      const spinner = this.contenedor.querySelector('[data-config-3d-loading]');
+      if (spinner) {
+        spinner.style.opacity = '1';
+        spinner.style.display = 'flex';
+      }
+
+      // 1. Limpiar logo y geometrías asociadas
+      if (this._logoMalla && this._modelo) {
+        this._modelo.remove(this._logoMalla);
+        this._logoMalla.geometry?.dispose();
+        this._logoMalla = null;
+      }
+      this._decalGeometrias.clear();
+      if (this._frenteReducido) {
+        this._frenteReducido.geometry?.dispose();
+        this._frenteReducido = null;
+      }
+
+      // 2. Retirar modelo anterior
+      if (this._modelo) {
+        this._escena.remove(this._modelo);
+        disponerModelo(this._modelo);
+        this._modelo = null;
+      }
+
+      // 3. Cargar nuevo modelo GLB
+      const nuevoModelo = await cargarModelo(nuevaRuta);
+      if (this._destruido) {
+        disponerModelo(nuevoModelo);
+        return;
+      }
+
+      this._modelo = nuevoModelo;
+      this._escena.add(nuevoModelo);
+      aplicarAcabadoTela(nuevoModelo);
+
+      const caja = centrarModelo(nuevoModelo);
+      this._caja = caja;
+
+      // 4. Precalcular anclaje frontal del pecho
+      this._obtenerFrenteReducido();
+
+      // 5. Aplicar color actual y logo Tambo
+      if (this._seleccion) {
+        this._aplicarSeleccion(this._seleccion);
+      } else {
+        this._aplicarSeleccion({ color: 'negro', logo: 'tambo' });
+      }
+
+      // 6. Actualizar modelo en el animador
+      if (this._animador) {
+        this._animador.modelo = nuevoModelo;
+      }
+
+      if (spinner) {
+        spinner.style.opacity = '0';
+        setTimeout(() => {
+          spinner.style.display = 'none';
+        }, 300);
+      }
+      this._solicitarRender();
+      console.info(`[Configurator3D] Modelo 3D actualizado a: ${key} (${nuevaRuta})`);
+    } catch (error) {
+      console.error('[Configurator3D] Error cambiando modelo 3D:', error);
+    }
+  }
+
+  /** Colorea los materiales del modelo con el hex del color elegido y aplica el logo de Tambo. */
   _aplicarSeleccion({ color, logo }) {
     if (!this._modelo) return;
 
-    const hex = COLORES.find((c) => c.id === color)?.hex;
+    const hex = COLORES.find((c) => c.id === color)?.hex || (color && color.startsWith('#') ? color : null);
     if (hex) {
       this._modelo.traverse((objeto) => {
         if (!objeto.isMesh || objeto === this._logoMalla) return;
@@ -156,39 +247,40 @@ export class Configurator3D {
       });
     }
 
-    this._aplicarLogo(logo);
+    const logoFinal = (logo && logo !== 'ninguno') ? logo : 'tambo';
+    this._aplicarLogo(logoFinal);
     this._solicitarRender();
   }
 
   /**
-   * Coloca en el pecho la textura del logo seleccionado.
-   * @param {string} logoId
+   * Coloca en el pecho la textura del logo seleccionado (Tambo por defecto).
+   * @param {string} [logoId='tambo']
    */
-  _aplicarLogo(logoId) {
-    this._logoIdActual = logoId;
+  _aplicarLogo(logoId = 'tambo') {
+    const finalId = (logoId && logoId !== 'ninguno') ? logoId : 'tambo';
+    this._logoIdActual = finalId;
     if (!this._modelo) {
       console.warn('[Configurator3D][Logo] Selección recibida sin modelo cargado; se aplicará al cargar.');
       return;
     }
 
-    const logo = LOGOS.find((l) => l.id === logoId);
+    const logo = LOGOS.find((l) => l.id === finalId) || LOGOS[0];
     if (!logo || !logo.src) {
-      console.warn('[Configurator3D][Logo] Logo no encontrado o sin src:', logoId);
+      console.warn('[Configurator3D][Logo] Logo no encontrado o sin src:', finalId);
       this._quitarLogo();
       return;
     }
 
     this._cargarTextoLogo(logo.src)
       .then((texto) => {
-        if (this._destruido || this._logoIdActual !== logoId || !this._modelo) return;
+        if (this._destruido || this._logoIdActual !== finalId || !this._modelo) return;
         this._colocarLogo(texto, logo.tamanoMax);
       })
       .catch((error) => {
         console.error('[Configurator3D][Logo] Falló la carga de la textura del logo:', {
-          logoId,
+          logoId: finalId,
           url: logo.src
         }, error);
-        this._quitarLogo();
       });
   }
 
@@ -246,11 +338,11 @@ export class Configurator3D {
         transparent: true,
         depthWrite: false,
         polygonOffset: true,
-        polygonOffsetFactor: -4,
-        polygonOffsetUnits: -24
+        polygonOffsetFactor: -8,
+        polygonOffsetUnits: -40
       });
       this._logoMalla = new THREE.Mesh(decal, this._logoMaterial);
-      this._logoMalla.renderOrder = 1;
+      this._logoMalla.renderOrder = 10;
       this._modelo.add(this._logoMalla);
     }
 

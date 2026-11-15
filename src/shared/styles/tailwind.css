@@ -1,3 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* Escalado general al 88% (~14px) para simular zoom 90% y encajar todas las secciones en pantalla */
+  html {
+    font-size: 88%;
+  }
+
+  /* Portátiles y laptops (< 1440px) */
+  @media (max-width: 1440px) {
+    html {
+      font-size: 82%;
+    }
+  }
+
+  /* Pantallas de 27 pulgadas y escritorios grandes (>= 1920px): zoom 125% */
+  @media (min-width: 1920px) {
+    html {
+      font-size: 125%;
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:max-h-\[500px\] {
+    max-height: 450px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .xl\:h-40 {
+    height: 13rem !important;
+  }
+}
+
+

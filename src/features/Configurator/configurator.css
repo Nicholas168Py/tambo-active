@@ -1,33 +1,48 @@
 /* ============================================
-   CONFIGURADOR DE PRODUCTO
-   Selector de color + logo con vista previa.
+   CONFIGURADOR DE PRODUCTO - 2 COLUMNAS (MONOCROMÁTICO)
    ============================================ */
 
-/* Preview central */
+/* Preview central / Columna Izquierda */
 .config-preview {
   position: relative;
+  background: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 60%, #e2e8f0 100%);
+  transition: background 300ms ease;
 }
+
+html.dark .config-preview {
+  background: radial-gradient(circle at center, #1c1c20 0%, #111113 70%, #0a0a0c 100%);
+}
+
+@media (min-width: 1024px) {
+  .lg\:max-h-\[500px\],
+  .config-preview {
+    max-height: 450px;
+  }
+}
+
+
 .config-glow {
   position: absolute;
   inset: -10%;
   z-index: 0;
   border-radius: 9999px;
   background: radial-gradient(circle,
-    rgba(158, 180, 119, 0.18) 0%,
-    rgba(158, 180, 119, 0.08) 45%,
-    transparent 72%);
-  filter: blur(8px);
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 50%,
+    transparent 75%);
+  filter: blur(12px);
   pointer-events: none;
 }
 
-/* Preview 3D (modelo GLB) */
+/* Visor 3D (modelo GLB) */
 .config-3d {
   position: relative;
   z-index: 1;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  height: 100%;
   overflow: hidden;
 }
+
 .config-3d-canvas {
   display: block;
   width: 100%;
@@ -35,6 +50,7 @@
   touch-action: none;
   cursor: grab;
 }
+
 .config-3d-canvas:active {
   cursor: grabbing;
 }
@@ -49,239 +65,229 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  background: rgba(244, 246, 245, 0.55);
+  background: rgba(12, 12, 12, 0.85);
+  backdrop-blur: 4px;
   transition: opacity 0.4s ease;
 }
+
 .config-3d[data-modelo-listo] .config-3d-loading {
   opacity: 0;
   pointer-events: none;
 }
+
 .config-3d-loading-text {
-  color: #6b7280;
+  color: #9ca3af;
   font-size: 0.8rem;
   letter-spacing: 0.02em;
 }
+
 .config-3d-loading-text::after {
   content: 'Preparando vista previa 3D…';
 }
+
 .config-3d[data-modelo-error] .config-3d-spinner {
   display: none;
 }
+
 .config-3d[data-modelo-error] .config-3d-loading-text::after {
   content: 'No se pudo cargar la vista previa 3D.';
 }
+
 .config-3d-spinner {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 9999px;
-  border: 3px solid rgba(0, 0, 0, 0.12);
-  border-top-color: #9eb477;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #ffffff;
   animation: config-spin 0.8s linear infinite;
 }
+
 @keyframes config-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* Selector de color */
+/* ============================================
+   PANEL UNIFICADO DE ACCIÓN (Columna Derecha)
+   ============================================ */
+
+.config-card {
+  background-color: #161618;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* 1. Selector de Color (Muestras Circulares 3x2) */
 .config-swatch {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
   margin-left: auto;
   margin-right: auto;
   border-radius: 9999px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.18);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 .config-color:hover .config-swatch {
-  transform: scale(1.08);
+  transform: scale(1.06);
 }
+
 .config-color:has(input:checked) .config-swatch {
-  transform: scale(1.1);
-  box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #9eb477, 0 12px 22px -8px rgba(0, 0, 0, 0.35);
+  transform: scale(1.08);
+  box-shadow: 0 0 0 2px #0c0c0c, 0 0 0 3.5px #ffffff, 0 6px 14px -3px rgba(255, 255, 255, 0.25);
 }
+
 .config-color-label {
   display: block;
-  margin-top: 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.65rem;
   font-weight: 500;
-  color: #4b5563;
+  color: #9ca3af;
+  margin-top: 0.2rem;
   transition: color 0.2s ease;
 }
+
 .config-color:has(input:checked) .config-color-label {
-  color: #1a1a1a;
+  color: #ffffff;
   font-weight: 700;
 }
 
-/* Check de selección (color y logo) */
+/* Checkmark del selector de color */
 .config-check {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 0.95rem;
+  height: 0.95rem;
   border-radius: 9999px;
-  background-color: #9eb477;
-  color: #ffffff;
-  box-shadow: 0 4px 10px -2px rgba(158, 180, 119, 0.7);
+  background-color: #ffffff;
+  color: #0c0c0c;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   opacity: 0;
   transform: scale(0.4);
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
+
 .config-check svg {
-  width: 0.875rem;
-  height: 0.875rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  stroke-width: 2.5;
 }
-.config-color:has(input:checked) .config-check,
-.config-logo:has(input:checked) .config-check {
+
+.config-color:has(input:checked) .config-check {
   opacity: 1;
   transform: scale(1);
 }
 
-/* Selector de logo */
+/* 2. Selector de Logo (3 Tarjetas Horizontales Compactas) */
 .config-logo-card {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 6rem;
-  padding: 0 1rem;
-  background-color: #ffffff;
-  border: 2px solid #e5e7eb;
-  border-radius: 0.75rem;
-  box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.1);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  height: 2.65rem;
+  padding: 0.25rem 0.4rem;
+  background-color: #141722;
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.65rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
 }
-/* Tarjeta para logos de imagen (blancos sobre fondo oscuro) */
-.config-logo-card--img {
-  background-color: #1f2937;
-  border-color: #374151;
-}
+
 .config-logo:hover .config-logo-card {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px -8px rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
 }
+
 .config-logo:has(input:checked) .config-logo-card {
-  border-color: #9eb477;
-  box-shadow: 0 12px 26px -10px rgba(158, 180, 119, 0.55), 0 6px 16px -8px rgba(0, 0, 0, 0.18);
+  border-color: #ffffff;
+  background-color: #1a1e2b;
+  box-shadow: 0 0 14px -2px rgba(255, 255, 255, 0.3);
 }
-.config-logo-txt {
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  color: #1a1a1a;
-  white-space: nowrap;
-}
+
 .config-logo-img {
-  height: 2.5rem;
+  max-height: 1.35rem;
+  max-width: 75%;
   object-fit: contain;
-  opacity: 0.6;
-  transition: opacity 0.25s ease;
+  opacity: 0.75;
+  transition: opacity 0.2s ease;
 }
-.config-logo-img--grande {
-  height: 4.5rem;
-}
+
 .config-logo:hover .config-logo-img,
 .config-logo:has(input:checked) .config-logo-img {
   opacity: 1;
 }
 
-/* Accesibilidad: anillo de foco visible sobre la opción seleccionable */
-.config-color:has(input:focus-visible) .config-swatch,
-.config-logo:has(input:focus-visible) .config-logo-card {
-  outline: 2px solid var(--color-brand-green);
-  outline-offset: 3px;
+/* Checkmark del selector de logo */
+.config-check-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 9999px;
+  background-color: #ffffff;
+  color: #0c0c0c;
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-/* Móvil: mantener el modelo centrado y reducir únicamente la escala.
-   Los logos se muestran en una fila para facilitar su uso. */
-@media (max-width: 639px) {
-  .config-3d {
-    width: 84%;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .config-logo {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-  .config-logo-card {
-    height: 4.5rem;
-    padding: 0 0.25rem;
-  }
-  .config-logo-img,
-  .config-logo-img--grande {
-    max-height: 3rem;
-    height: 3rem;
-  }
+.config-check-logo svg {
+  width: 0.65rem;
+  height: 0.65rem;
+  stroke-width: 2.5;
 }
 
-/* Tableta */
-@media (min-width: 768px) {
-  .config-swatch {
-    width: 3rem;
-    height: 3rem;
-  }
-  .config-logo-card {
-    height: 5rem;
-  }
+.config-logo:has(input:checked) .config-check-logo {
+  opacity: 1;
+  transform: scale(1);
 }
 
-/* Modo oscuro de la sección (cuando se selecciona un color claro) */
-.config-section--oscuro {
-  background-color: #1a1a1a;
-}
-.config-section--oscuro [data-section-heading] h2,
-.config-section--oscuro [data-section-heading] p,
-.config-section--oscuro h3,
-.config-section--oscuro .config-color-label,
-.config-section--oscuro [data-config-caption] {
-  color: #f3f4f6;
-}
-.config-section--oscuro [data-section-heading] p,
-.config-section--oscuro [data-config-caption] {
-  color: #9ca3af;
-}
-.config-section--oscuro .config-color-label {
+/* 3. Selector de Tallas (Chips Horizontales) */
+.config-size-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.15rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background-color: #101114;
   color: #d1d5db;
+  font-weight: 700;
+  font-size: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.18s ease;
 }
-.config-section--oscuro .config-color:has(input:checked) .config-color-label {
+
+.config-size-chip:hover {
+  border-color: #ffffff;
   color: #ffffff;
 }
-.config-section--oscuro .config-swatch {
-  border-color: rgba(255, 255, 255, 0.25);
-}
-.config-section--oscuro .config-logo-card {
-  background-color: #1f2937;
-  border-color: #374151;
-}
-.config-section--oscuro .config-logo-card:has(.config-logo-txt) {
-  background-color: #111827;
-}
-.config-section--oscuro .config-logo-txt {
-  color: #f3f4f6;
+
+.config-size-chip.is-selected {
+  background-color: #ffffff;
+  border-color: #ffffff;
+  color: #0c0c0c;
+  font-weight: 900;
+  box-shadow: 0 4px 10px -2px rgba(255, 255, 255, 0.25);
 }
 
-/* Escritorio */
-@media (min-width: 1024px) {
-  .config-swatch {
-    width: 4rem;
-    height: 4rem;
-  }
-  .config-logo-card {
-    height: 7rem;
-  }
-  .config-logo-txt {
-    font-size: 1.5rem;
-  }
-  .config-logo-img {
-    height: 3rem;
-  }
-  .config-logo-img--grande {
-    height: 5.5rem;
-  }
+/* 4. Feedback en Botón Agregar al Carrito */
+#btn-add-to-cart.is-success {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  box-shadow: 0 10px 25px -5px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Foco accesible */
+.config-color:has(input:focus-visible) .config-swatch,
+.config-logo:has(input:focus-visible) .config-logo-card,
+.config-size-chip:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
 }

@@ -17,12 +17,13 @@ export function sectionHeading({
   title,
   subtitle = '',
   wrapperClass = 'mb-16',
-  h2Class = ''
+  h2Class = 'text-slate-900 dark:text-white'
 } = {}) {
+  const finalH2Class = h2Class.includes('text-') ? h2Class : `text-slate-900 dark:text-white ${h2Class}`;
   return [
     `<div class="text-center ${wrapperClass}" data-reveal>`,
-    `<h2 class="text-3xl md:text-4xl font-bold ${h2Class} uppercase tracking-wide">${title}</h2>`,
-    subtitle ? `<p class="text-gray-500 text-base md:text-lg">${subtitle}</p>` : '',
+    `<h2 class="text-3xl md:text-4xl font-bold ${finalH2Class} uppercase tracking-wide transition-colors">${title}</h2>`,
+    subtitle ? `<p class="text-slate-600 dark:text-gray-400 text-base md:text-lg transition-colors">${subtitle}</p>` : '',
     '</div>'
   ].join('');
 }
